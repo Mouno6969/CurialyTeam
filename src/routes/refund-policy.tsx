@@ -21,7 +21,7 @@ const sections = [
   {
     id: "03",
     title: "How to ask",
-    copy: `Message @${TELEGRAM_HANDLE} on Telegram with the payment-link reference, the plan, and the delivery detail you gave at checkout (for example the X handle). We confirm the miss, then return the same amount on the same network and coin.`,
+    copy: `Message @${TELEGRAM_HANDLE} on Telegram with the order code from your receipt, the plan, and the delivery detail you gave at checkout (for example the X handle). We confirm the miss, then return the same amount on the same network and coin.`,
   },
   {
     id: "04",
@@ -88,7 +88,7 @@ function RefundPolicy() {
           <div>
             <h2 className="font-display text-3xl tracking-[-0.04em]">Still waiting on an order?</h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-              Bring the payment-link reference to Telegram. If it failed to reach you, the
+              Bring the order code from your receipt to Telegram. If it failed to reach you, the
               refund is due.
             </p>
           </div>

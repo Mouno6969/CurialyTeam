@@ -56,7 +56,7 @@ export function BagDrawer() {
       void navigate({ to: "/pay/$id", params: { id: order.orderCode } });
     } catch (cause) {
       setError(
-        cause instanceof ApiError ? cause.message : "Could not open a payment link. Try again.",
+        cause instanceof ApiError ? cause.message : "Could not create your order. Try again.",
       );
       setPending(false);
     }
@@ -223,7 +223,7 @@ export function BagDrawer() {
               <ShoppingBag className="size-7 text-muted-foreground" />
               <h3 className="font-display mt-4 text-2xl">Your bag is open.</h3>
               <p className="mt-2 max-w-xs text-sm leading-6 text-muted-foreground">
-                Choose a plan and it will appear here, ready to create a secure payment link.
+                Choose a plan and it will appear here, ready to become an order.
               </p>
             </div>
           )}
@@ -244,7 +244,7 @@ export function BagDrawer() {
               disabled={!bag.length || pending}
             >
               <ShieldCheck className="size-4" />
-              {pending ? "Creating secure payment link…" : "Continue to payment"}
+              {pending ? "Creating your order…" : "Continue to payment"}
             </Button>
             {error ? (
               <p className="mt-3 rounded-md bg-destructive/15 px-3 py-2 text-center text-xs leading-5 text-destructive">

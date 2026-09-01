@@ -82,7 +82,7 @@ function Referrals() {
                 {
                   Icon: WalletCards,
                   title: "2. Your friend makes an order",
-                  copy: "They use the link, create a payment session, and choose a payment method.",
+                  copy: "They use the link, place an order, and pay on the network and coin they prefer.",
                 },
                 {
                   Icon: ShieldCheck,

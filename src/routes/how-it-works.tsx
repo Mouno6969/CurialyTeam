@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ClipboardCheck, Send, ShoppingBag } from "lucide-react";
+import { Check, ClipboardCheck, ReceiptText, Send, ShoppingBag } from "lucide-react";
 import { SiteChrome } from "@/components/layout/SiteChrome";
 import { PageHero } from "@/components/layout/PageHero";
 import { Button } from "@/components/ui/button";
@@ -21,9 +21,15 @@ const steps = [
   },
   {
     number: "03",
-    title: "Prepare your request",
-    copy: "Confirm delivery details, then continue to a secure payment link priced on the server.",
+    title: "Pay and submit",
+    copy: "Confirm delivery details, pick a network and coin, then send the exact amount shown to the address shown and paste the transaction hash back.",
     icon: Send,
+  },
+  {
+    number: "04",
+    title: "Keep your receipt",
+    copy: "A receipt is issued straight away, carrying your order code as both a barcode and a QR code. Use that code to follow the order through to completion.",
+    icon: ReceiptText,
   },
 ];
 
@@ -37,7 +43,7 @@ function HowItWorks() {
         copy="Curialy keeps the order-preparation process concise. Every step is visible before you continue to payment."
       />
       <section className="page-wrap pb-16 sm:pb-20">
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step) => {
             const Icon = step.icon;
             return (

@@ -23,16 +23,36 @@ const guidance = [
   },
   {
     id: "04",
-    title: "Opening a payment link",
-    copy: "Continue from the bag to receive an opaque payment link. Choose a network and coin, then transfer manually or connect a wallet.",
+    title: "Your order code",
+    copy: "Continuing from the bag creates an order and gives it a short code, such as CLY-7K3M2QX9. That code is how you find the order later and how support finds it too. It appears on screen and on your receipt.",
   },
   {
     id: "05",
-    title: "Human support",
-    copy: "Questions go to @Curialy on Telegram. A person reads the desk. Include the payment-link reference when the matter is about a specific order.",
+    title: "Paying",
+    copy: "Choose the network you will send from, then the coin. The exact amount and the destination address are then shown together; send that amount to that address from any wallet, and paste the transaction hash back. Manual transfer is the only method — there is no wallet connection.",
   },
   {
     id: "06",
+    title: "Stablecoins and native coins",
+    copy: "USDC and USDT amounts are fixed in dollars. Native coins (ETH, SOL, POL) are converted at a reference rate that is fixed onto your order when you choose the coin, so the figure you are shown is the figure that counts.",
+  },
+  {
+    id: "07",
+    title: "Your receipt",
+    copy: "Submitting the transaction hash issues a receipt immediately, with the order code, the delivery handle, the items, the amount, the destination address, and the hash. It carries a barcode of the order code and a QR code that opens the order's status page. It is downloadable, and it reissues itself as the status changes.",
+  },
+  {
+    id: "08",
+    title: "Checking an order",
+    copy: "Enter your code on the order status page at any time. Case and the CLY- prefix are optional. An order reads awaiting payment, then pending review once you submit a hash, then confirming while it is checked, and finally completed or rejected. Unpaid orders expire after thirty minutes.",
+  },
+  {
+    id: "09",
+    title: "Human support",
+    copy: "Questions go to @Curialy on Telegram. A person reads the desk. Quote your order code when the matter is about a specific order.",
+  },
+  {
+    id: "10",
     title: "Refunds",
     copy: "If a paid order fails to reach the account you named, we refund it. The full wording lives on the refund policy page.",
   },
@@ -45,7 +65,7 @@ function Documentation() {
         kicker="Store documentation"
         title="The essentials,"
         emphasis="in one place."
-        copy="Use this reference to understand availability, plan selection, and the request-preparation flow before you use the store."
+        copy="Use this reference to understand availability, plan selection, how an order is paid for, and how to check its status afterwards using the code on your receipt."
       />
       <section className="page-wrap pb-16 sm:pb-20">
         <div className="grid gap-5 lg:grid-cols-[0.34fr_0.66fr]">
@@ -85,12 +105,16 @@ function Documentation() {
           <div>
             <h2 className="font-display text-3xl tracking-[-0.04em]">Ready to browse plans?</h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Return to the storefront to see current status and available plan options.
+              Return to the storefront to see current status and available plan options, or check
+              an existing order with its code.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Button asChild>
               <Link to="/">Visit the store</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/order">Check an order</Link>
             </Button>
             <Button asChild variant="outline">
               <Link to="/refund-policy">Refund policy</Link>

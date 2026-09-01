@@ -15,7 +15,7 @@ const supportTopics = [
   },
   {
     title: "Order requests",
-    copy: "Use the bag to prepare a concise request. The site provides a payment link, not a payment confirmation.",
+    copy: "Use the bag to prepare a concise request. Submitting a transaction hash records an order and issues a receipt; it is not itself a payment confirmation.",
     icon: FileText,
   },
   {
@@ -32,7 +32,7 @@ function Support() {
         kicker="A person, not a queue"
         title="Write to us,"
         emphasis="we read it ourselves."
-        copy="Orders, payment links, and delivery questions go to a human desk on Telegram. Include your payment-link reference if the matter is about a specific order."
+        copy="Orders, payments, and delivery questions go to a human desk on Telegram. Quote the order code from your receipt if the matter is about a specific order."
       />
       <section className="page-wrap pb-16 sm:pb-20">
         <div className="relative overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-border)]">
@@ -44,7 +44,7 @@ function Support() {
               </h2>
               <p className="mt-4 max-w-xl text-sm leading-7 text-muted-foreground">
                 This is a personal Telegram account, not a screenshot bot. Ask about
-                availability, a payment session, or a delivery that has not arrived. A
+                availability, an order in progress, or a delivery that has not arrived. A
                 person on the Curialy side opens every message.
               </p>
               <ul className="mt-7 space-y-3 text-sm leading-6 text-muted-foreground">
@@ -55,8 +55,8 @@ function Support() {
                 </li>
                 <li className="flex gap-3">
                   <Send className="mt-0.5 size-4 shrink-0 text-foreground" />
-                  Send the payment-link id, the plan, and the delivery handle if the
-                  question is about an order.
+                  Send the order code from your receipt, the plan, and the delivery handle
+                  if the question is about an order.
                 </li>
               </ul>
               <Button asChild className="mt-8" size="lg">
@@ -76,7 +76,7 @@ function Support() {
                 <div>
                   <p className="font-medium text-foreground">What we handle</p>
                   <p className="mt-1 text-muted-foreground">
-                    Order status, missing delivery, payment-link questions, refunds.
+                    Order status, missing delivery, payment questions, refunds.
                   </p>
                 </div>
                 <div>
@@ -129,8 +129,8 @@ function Support() {
               Start with documentation.
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-              Availability rules, bag behavior, and the payment-link flow sit together
-              in one reference.
+              Availability rules, bag behavior, receipts, and how to check an order sit
+              together in one reference.
             </p>
             <Button asChild className="mt-6" variant="outline">
               <Link to="/documentation">Open documentation</Link>
