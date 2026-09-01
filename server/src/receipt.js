@@ -1,11 +1,8 @@
 // Receipt image generator.
 //
-// Layout and palette follow the parchment receipt from the operator's existing
-// Telegram bot (Mouno-Private `build_receipt_image`): cream page, gold rounded
-// border, faint rules, a circular logo seal, a coloured status pill, uppercase
-// label/value rows, then a verification band. Typography is Curialy's own
-// (Instrument Serif / Instrument Sans / IBM Plex Mono) so the receipt matches
-// the storefront rather than the bot.
+// One A4 page: letterhead, item table, settlement ledger, verification strip.
+// Issued automatically when an order is recorded and again whenever status
+// changes. Typography is Curialy's (Instrument Serif / Sans / IBM Plex Mono).
 
 import fs from "node:fs";
 import path from "node:path";
@@ -30,94 +27,45 @@ for (const [file, family] of [
 const LOGO_PATH = path.join(ASSETS, "curialy-logo.jpg");
 
 const C = {
-  page: "#f6eedc",
-  card: "#fffcf2",
-  gold: "#b88952",
-  ink: "#3f271c",
-  label: "#814828",
-  value: "#232323",
-  muted: "#715f4c",
-  rule: "rgba(224,203,171,0.85)",
-  ruleFaint: "rgba(231,216,190,0.32)",
-  sealRing: "rgba(129,72,40,0.75)",
-  sealRingInner: "rgba(129,72,40,0.43)",
+  paper: "#f3efe6",
+  ink: "#1c1915",
+  muted: "#6a6258",
+  label: "#5c5349",
+  rule: "#d7d0c3",
+  ruleStrong: "#b7ae9e",
+  gold: "#8c6a3c",
+  goldSoft: "rgba(140, 106, 60, 0.22)",
+  chip: "#efe8d8",
+  white: "#fbf8f1",
 };
 
 const STATUS_FILL = {
-  completed: "#1f8149",
-  pending: "#b0741c",
-  confirming: "#2f6f9e",
-  awaiting_payment: "#8a7355",
-  rejected: "#a33a2a",
-  expired: "#6b6b6b",
+  completed: { fill: "#234d32", text: "#f4f0e6" },
+  pending: { fill: "#8a5a18", text: "#fbf8f1" },
+  confirming: { fill: "#2a5274", text: "#fbf8f1" },
+  awaiting_payment: { fill: "#6b6258", text: "#fbf8f1" },
+  rejected: { fill: "#7a2e24", text: "#fbf8f1" },
+  expired: { fill: "#5a5752", text: "#fbf8f1" },
 };
 
-const WIDTH = 1100;
-const MARGIN = 90;
-const CONTENT_WIDTH = WIDTH - MARGIN * 2;
-
-const serif = (size) => `${size}px ReceiptSerif, serif`;
-const sans = (size, weight = 400) => `${weight} ${size}px ReceiptSans, sans-serif`;
-const mono = (size, bold = false) =>
-  `${size}px ${bold ? "ReceiptMonoBold" : "ReceiptMono"}, monospace`;
-
-/** Middle-elides a long identifier: 0xb94a70…BA1e25 */
-function shortMiddle(value, head = 10, tail = 8) {
-  const text = String(value ?? "");
-  if (text.length <= head + tail + 1) return text;
-  return `${text.slice(0, head)}…${text.slice(-tail)}`;
-}
-
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.roundRect(x, y, w, h, r);
-}
-
-/**
- * Draws `text` wrapped to `maxWidth`, breaking mid-word for unbroken strings
- * such as transaction hashes. Returns the y just past the last line.
- */
-function drawWrapped(ctx, text, x, y, maxWidth, lineHeight) {
-  const words = String(text ?? "").split(/\s+/).filter(Boolean);
-  let line = "";
-  let cursor = y;
-
-  const flush = () => {
-    if (!line) return;
-    ctx.fillText(line, x, cursor);
-    cursor += lineHeight;
-    line = "";
-  };
-
-  for (const word of words) {
-    const candidate = line ? `${line} ${word}` : word;
-    if (ctx.measureText(candidate).width <= maxWidth) {
-      line = candidate;
-      continue;
-    }
-    flush();
-    // A single word wider than the column (hash, address) is split by character.
-    if (ctx.measureText(word).width > maxWidth) {
-      let chunk = "";
-      for (const char of word) {
-        if (ctx.measureText(chunk + char).width > maxWidth) {
-          ctx.fillText(chunk, x, cursor);
-          cursor += lineHeight;
-          chunk = char;
-        } else {
-          chunk += char;
-        }
-      }
-      line = chunk;
-    } else {
-      line = word;
-    }
-  }
-  flush();
-  return cursor;
-}
-
 const NETWORK_LABELS = { ethereum: "Ethereum", solana: "Solana", polygon: "Polygon" };
+
+// A4 at 144 dpi.
+const PAGE_W = 1191;
+const PAGE_H = 1684;
+const X = 72;
+const RIGHT = PAGE_W - 72;
+const COL = RIGHT - X;
+
+const BAND_H = 236;
+const FOOTER_H = 88;
+const QR_SIZE = 108;
+const BAR_H = 44;
+
+const serif = (n) => `${n}px ReceiptSerif, serif`;
+const sans = (n, w = 400) => `${w} ${n}px ReceiptSans, sans-serif`;
+const mono = (n, bold = false) =>
+  `${n}px ${bold ? "ReceiptMonoBold" : "ReceiptMono"}, monospace`;
 
 function stamp(value) {
   if (!value) return null;
@@ -126,48 +74,31 @@ function stamp(value) {
   return date.toISOString().replace("T", " ").slice(0, 19) + " UTC";
 }
 
-/** The label/value rows, in display order. Absent data is stated, never blank. */
-function buildRows(order) {
-  const rows = [
-    { label: "Order ID", value: order.order_code, mono: true, emphasis: true },
-    { label: "X handle", value: order.x_handle ? `@${order.x_handle}` : "Not provided" },
-    { label: "Items", value: order.basket_summary },
-    { label: "Order total", value: `$${Number(order.total_usd).toFixed(2)} USD` },
-  ];
+function shortMiddle(value, head = 10, tail = 8) {
+  const text = String(value ?? "");
+  if (text.length <= head + tail + 1) return text;
+  return `${text.slice(0, head)}…${text.slice(-tail)}`;
+}
 
-  if (order.network && order.coin) {
-    rows.push({
-      label: "Payment network",
-      value: `${NETWORK_LABELS[order.network] || order.network} · ${order.coin}`,
-    });
-    rows.push({
-      label: "Amount to send",
-      value: `${order.expected_amount ?? "—"} ${order.coin}`,
-      mono: true,
-    });
-    rows.push({
-      label: "Destination wallet",
-      value: shortMiddle(order.settlement_address, 12, 10),
-      mono: true,
-    });
-  } else {
-    rows.push({ label: "Payment network", value: "Not selected yet" });
-  }
+function money(n) {
+  return `$${Number(n).toFixed(2)}`;
+}
 
-  rows.push({
-    label: "Transaction hash",
-    value: order.tx_hash || "Awaiting submission",
-    mono: Boolean(order.tx_hash),
-  });
-  rows.push({ label: "Placed", value: stamp(order.created_at) || "—" });
+function line(ctx, y, color = C.rule, width = 1) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.beginPath();
+  ctx.moveTo(X, y + 0.5);
+  ctx.lineTo(RIGHT, y + 0.5);
+  ctx.stroke();
+}
 
-  const submitted = stamp(order.submitted_at);
-  if (submitted) rows.push({ label: "Payment submitted", value: submitted });
-  const completed = stamp(order.completed_at);
-  if (completed) rows.push({ label: "Completed", value: completed });
-  if (order.admin_note) rows.push({ label: "Note from Curialy", value: order.admin_note });
-
-  return rows;
+function kicker(ctx, text, x, y) {
+  ctx.fillStyle = C.label;
+  ctx.font = sans(11, 500);
+  ctx.letterSpacing = "0.16em";
+  ctx.fillText(String(text).toUpperCase(), x, y);
+  ctx.letterSpacing = "0";
 }
 
 /** Where the QR points: the public status page, pre-filled with the code. */
@@ -175,79 +106,31 @@ export function verifyUrl(order) {
   return `${config.publicBaseUrl}/order?code=${encodeURIComponent(order.order_code)}`;
 }
 
-async function buildQr(text, size) {
-  const buffer = await QRCode.toBuffer(text, {
-    type: "png",
-    errorCorrectionLevel: "M",
-    margin: 2,
-    width: size,
-    color: { dark: "#3f271c", light: "#fffcf2" },
-  });
-  return loadImage(buffer);
-}
-
-/**
- * Code128 of the order code. Order codes are restricted to A-Z0-9 and dashes,
- * all of which Code128 encodes directly.
- */
-async function buildBarcode(code) {
-  const buffer = await bwipjs.toBuffer({
-    bcid: "code128",
-    text: code,
-    scale: 3,
-    height: 14,
-    includetext: false,
-    backgroundcolor: "FFFCF2",
-    barcolor: "3F271C",
-    paddingwidth: 0,
-    paddingheight: 0,
-  });
-  return loadImage(buffer);
-}
-
-const ROWS_TOP = 315;
-const BAND_HEIGHT = 292;
-const FOOTER_HEIGHT = 96;
-
-/** Measures the wrapped row block so the canvas is exactly tall enough. */
-function measureRows(rows) {
-  const scratch = createCanvas(WIDTH, 10).getContext("2d");
-  let y = ROWS_TOP;
-  for (const row of rows) {
-    scratch.font = row.mono ? mono(row.emphasis ? 33 : 27) : sans(row.emphasis ? 33 : 29);
-    const lines = countLines(scratch, row.value, CONTENT_WIDTH);
-    y += 34 + lines * 38 + 48;
-  }
-  return y;
-}
-
-function countLines(ctx, text, maxWidth) {
-  const words = String(text ?? "").split(/\s+/).filter(Boolean);
-  let line = "";
-  let lines = 1;
-  for (const word of words) {
-    const candidate = line ? `${line} ${word}` : word;
-    if (ctx.measureText(candidate).width <= maxWidth) {
-      line = candidate;
-      continue;
-    }
-    lines += 1;
-    if (ctx.measureText(word).width > maxWidth) {
-      let chunk = "";
-      for (const char of word) {
-        if (ctx.measureText(chunk + char).width > maxWidth) {
-          lines += 1;
-          chunk = char;
-        } else {
-          chunk += char;
-        }
-      }
-      line = chunk;
-    } else {
-      line = word;
+function parseItems(order) {
+  let items = order.items;
+  if (typeof items === "string") {
+    try {
+      items = JSON.parse(items);
+    } catch {
+      items = [];
     }
   }
-  return lines;
+  if (Array.isArray(items) && items.length) {
+    return items.map((item) => ({
+      productName: item.productName || item.name || "Plan",
+      planLabel: item.planLabel || item.label || "—",
+      quantity: item.quantity ?? 1,
+      lineTotal: item.lineTotal ?? Number(item.unitPrice ?? item.price ?? 0) * (item.quantity ?? 1),
+    }));
+  }
+  return [
+    {
+      productName: String(order.basket_summary || "Order").split("·")[0].trim(),
+      planLabel: "—",
+      quantity: 1,
+      lineTotal: Number(order.total_usd),
+    },
+  ];
 }
 
 async function drawSeal(ctx, x, y, size) {
@@ -258,7 +141,6 @@ async function drawSeal(ctx, x, y, size) {
     ctx.beginPath();
     ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
     ctx.clip();
-    ctx.globalAlpha = 0.58;
     ctx.drawImage(
       logo,
       (logo.width - side) / 2,
@@ -272,169 +154,325 @@ async function drawSeal(ctx, x, y, size) {
     );
     ctx.restore();
     ctx.save();
-  } else {
-    ctx.fillStyle = "rgba(129,72,40,0.16)";
-    ctx.beginPath();
-    ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
-    ctx.fill();
   }
-  // Concentric rings sit on top of the mark either way.
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = C.sealRing;
+  ctx.strokeStyle = "rgba(28,25,21,0.22)";
+  ctx.lineWidth = 1.25;
   ctx.beginPath();
-  ctx.arc(x + size / 2, y + size / 2, size / 2 - 4, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = C.sealRingInner;
-  ctx.beginPath();
-  ctx.arc(x + size / 2, y + size / 2, size / 2 - 18, 0, Math.PI * 2);
+  ctx.arc(x + size / 2, y + size / 2, size / 2 - 0.6, 0, Math.PI * 2);
   ctx.stroke();
   ctx.restore();
 }
 
+async function buildQr(text, size) {
+  const buffer = await QRCode.toBuffer(text, {
+    type: "png",
+    errorCorrectionLevel: "M",
+    margin: 1,
+    width: size,
+    color: { dark: "#1c1915", light: "#fbf8f1" },
+  });
+  return loadImage(buffer);
+}
+
+async function buildBarcode(code) {
+  const buffer = await bwipjs.toBuffer({
+    bcid: "code128",
+    text: code,
+    scale: 3,
+    height: 10,
+    includetext: false,
+    backgroundcolor: "FBF8F1",
+    barcolor: "1C1915",
+    paddingwidth: 0,
+    paddingheight: 0,
+  });
+  return loadImage(buffer);
+}
+
+function drawWrapped(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = String(text ?? "").split(/\s+/).filter(Boolean);
+  let line = "";
+  let cursor = y;
+  const flush = () => {
+    if (!line) return;
+    ctx.fillText(line, x, cursor);
+    cursor += lineHeight;
+    line = "";
+  };
+  for (const word of words) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (ctx.measureText(candidate).width <= maxWidth) {
+      line = candidate;
+      continue;
+    }
+    flush();
+    line = word;
+  }
+  flush();
+  return cursor;
+}
+
 /**
  * Renders the receipt for an order row as a PNG buffer.
- * The status pill reflects the order's status at render time, so the same URL
+ * The status chip reflects the order at render time, so the same URL
  * yields PENDING REVIEW before the admin acts and COMPLETED afterwards.
  */
 export async function renderReceipt(order) {
-  const rows = buildRows(order);
-  const height = measureRows(rows) + BAND_HEIGHT + FOOTER_HEIGHT + 60;
+  const items = parseItems(order);
+  const extraRows = Math.max(0, items.length - 1);
+  const noteLines = order.admin_note ? 2 : 0;
+  const contentBottom = 780 + extraRows * 36 + noteLines * 22;
+  const minForBand = contentBottom + 28 + BAND_H + FOOTER_H + 36;
+  const H = Math.max(PAGE_H, minForBand);
 
-  const canvas = createCanvas(WIDTH, height);
+  const canvas = createCanvas(PAGE_W, H);
   const ctx = canvas.getContext("2d");
   ctx.textBaseline = "top";
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
 
-  ctx.fillStyle = C.page;
-  ctx.fillRect(0, 0, WIDTH, height);
+  ctx.fillStyle = C.paper;
+  ctx.fillRect(0, 0, PAGE_W, H);
 
-  ctx.fillStyle = C.card;
-  roundRect(ctx, 45, 45, WIDTH - 90, height - 90, 36);
-  ctx.fill();
-  ctx.strokeStyle = C.gold;
-  ctx.lineWidth = 4;
-  ctx.stroke();
-
-  // Faint ruled paper.
-  ctx.strokeStyle = C.ruleFaint;
+  ctx.strokeStyle = C.goldSoft;
   ctx.lineWidth = 1;
-  for (let y = 90; y < height - 80; y += 70) {
-    ctx.beginPath();
-    ctx.moveTo(70, y + 0.5);
-    ctx.lineTo(WIDTH - 70, y + 0.5);
-    ctx.stroke();
-  }
+  ctx.strokeRect(36.5, 36.5, PAGE_W - 73, H - 73);
+  ctx.strokeStyle = C.rule;
+  ctx.strokeRect(40.5, 40.5, PAGE_W - 81, H - 81);
 
-  await drawSeal(ctx, WIDTH - 190 - 70, 70, 190);
-
+  await drawSeal(ctx, X, 72, 58);
   ctx.fillStyle = C.ink;
-  ctx.font = serif(58);
-  ctx.fillText("Curialy receipt", MARGIN - 10, 74);
+  ctx.font = serif(34);
+  ctx.fillText("Curialy", X + 72, 74);
+  ctx.fillStyle = C.muted;
+  ctx.font = sans(13);
+  ctx.fillText("Independent digital subscription store", X + 72, 114);
+
+  ctx.textAlign = "right";
+  ctx.fillStyle = C.gold;
+  ctx.font = sans(11, 500);
+  ctx.letterSpacing = "0.22em";
+  ctx.fillText("RECEIPT", RIGHT, 74);
+  ctx.letterSpacing = "0";
+  ctx.fillStyle = C.ink;
+  ctx.font = mono(22, true);
+  ctx.fillText(order.order_code, RIGHT, 96);
+  ctx.fillStyle = C.muted;
+  ctx.font = sans(13);
+  ctx.fillText(`Document date  ${stamp(new Date())}`, RIGHT, 128);
+  ctx.textAlign = "left";
+
+  line(ctx, 168, C.ruleStrong);
 
   const statusLabel = STATUS_LABELS[order.status] || String(order.status).toUpperCase();
-  ctx.font = sans(28, 600);
-  const pillWidth = ctx.measureText(statusLabel).width + 48;
-  ctx.fillStyle = STATUS_FILL[order.status] || C.muted;
-  roundRect(ctx, MARGIN - 8, 155, pillWidth, 52, 20);
+  const chip = STATUS_FILL[order.status] || STATUS_FILL.pending;
+  ctx.font = sans(12, 600);
+  const chipW = Math.min(ctx.measureText(statusLabel).width + 24, 280);
+  ctx.fillStyle = chip.fill;
+  ctx.beginPath();
+  ctx.roundRect(RIGHT - chipW, 184, chipW, 26, 3);
   ctx.fill();
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText(statusLabel, MARGIN + 16, 168);
+  ctx.fillStyle = chip.text;
+  ctx.fillText(statusLabel, RIGHT - chipW + 12, 190);
 
-  ctx.fillStyle = C.muted;
-  ctx.font = sans(23);
-  ctx.fillText(`Generated: ${stamp(new Date())}`, MARGIN - 10, 228);
-
-  let y = ROWS_TOP;
-  for (const row of rows) {
-    ctx.fillStyle = C.label;
-    ctx.font = sans(25, 600);
-    ctx.fillText(row.label.toUpperCase(), MARGIN, y);
-
-    ctx.fillStyle = row.emphasis ? C.ink : C.value;
-    ctx.font = row.mono ? mono(row.emphasis ? 33 : 27) : sans(row.emphasis ? 33 : 29);
-    const after = drawWrapped(ctx, row.value, MARGIN, y + 34, CONTENT_WIDTH, 38);
-
-    y = after + 22;
-    ctx.strokeStyle = C.rule;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(MARGIN, y);
-    ctx.lineTo(WIDTH - MARGIN, y);
-    ctx.stroke();
-    y += 26;
-  }
-
-  // Verification band: scannable barcode of the order code, plus a QR to the
-  // status page so the receipt can be checked without typing anything.
-  const bandTop = y;
-  ctx.fillStyle = "rgba(255,252,242,0.96)";
-  roundRect(ctx, MARGIN, bandTop, CONTENT_WIDTH, BAND_HEIGHT - 24, 28);
-  ctx.fill();
-  ctx.strokeStyle = "rgba(184,137,82,0.86)";
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
-  const qrSize = 170;
-  const qrPanelX = WIDTH - MARGIN - 24 - qrSize - 24;
-  const barcodeMaxWidth = qrPanelX - MARGIN - 60;
-
-  ctx.fillStyle = C.label;
-  ctx.font = sans(24, 600);
-  ctx.fillText("Order barcode", MARGIN + 30, bandTop + 26);
-
-  const barcode = await buildBarcode(order.order_code);
-  const barcodeScale = Math.min(1, barcodeMaxWidth / barcode.width);
-  const barcodeWidth = barcode.width * barcodeScale;
-  const barcodeHeight = barcode.height * barcodeScale;
-  ctx.drawImage(barcode, MARGIN + 30, bandTop + 66, barcodeWidth, barcodeHeight);
-
+  kicker(ctx, "Issued to", X, 186);
   ctx.fillStyle = C.ink;
-  ctx.font = mono(30, true);
-  ctx.fillText(order.order_code, MARGIN + 30, bandTop + 74 + barcodeHeight);
-
+  ctx.font = sans(18, 500);
+  ctx.fillText(order.x_handle ? `@${order.x_handle}` : "Guest", X, 206);
   ctx.fillStyle = C.muted;
-  ctx.font = sans(20);
-  drawWrapped(
-    ctx,
-    "Quote this code to support, or enter it on the order status page.",
-    MARGIN + 30,
-    bandTop + 118 + barcodeHeight,
-    barcodeMaxWidth,
-    26,
+  ctx.font = sans(13);
+  ctx.fillText("Delivery handle for this order", X, 230);
+
+  kicker(ctx, "Issued by", X + 340, 186);
+  ctx.fillStyle = C.ink;
+  ctx.font = sans(18, 500);
+  ctx.fillText("Curialy", X + 340, 206);
+  ctx.fillStyle = C.muted;
+  ctx.font = sans(13);
+  ctx.fillText(
+    `${config.publicBaseUrl.replace(/^https?:\/\//, "")}  ·  t.me/Curialy`,
+    X + 340,
+    230,
   );
 
+  line(ctx, 268);
+
+  kicker(ctx, "Particulars", X, 292);
+  const tableTop = 320;
+  ctx.fillStyle = C.chip;
+  ctx.fillRect(X, tableTop, COL, 34);
   ctx.fillStyle = C.label;
-  ctx.font = sans(24, 600);
-  const scanLabel = "Scan to verify";
-  const scanWidth = ctx.measureText(scanLabel).width;
-  ctx.fillText(scanLabel, qrPanelX + (qrSize + 48) / 2 - scanWidth / 2, bandTop + 26);
+  ctx.font = sans(11, 500);
+  ctx.letterSpacing = "0.12em";
+  ctx.fillText("ITEM", X + 16, tableTop + 10);
+  ctx.fillText("PERIOD", X + 360, tableTop + 10);
+  ctx.fillText("QTY", X + 560, tableTop + 10);
+  ctx.textAlign = "right";
+  ctx.fillText("AMOUNT", RIGHT - 16, tableTop + 10);
+  ctx.textAlign = "left";
+  ctx.letterSpacing = "0";
 
-  const qr = await buildQr(verifyUrl(order), qrSize);
-  ctx.drawImage(qr, qrPanelX + 24, bandTop + 62, qrSize, qrSize);
+  let rowY = tableTop + 46;
+  for (const item of items) {
+    ctx.fillStyle = C.ink;
+    ctx.font = sans(16, 500);
+    ctx.fillText(item.productName, X + 16, rowY);
+    ctx.font = sans(15);
+    ctx.fillText(item.planLabel, X + 360, rowY);
+    ctx.font = mono(15);
+    ctx.fillText(String(item.quantity), X + 560, rowY);
+    ctx.textAlign = "right";
+    ctx.fillText(money(item.lineTotal), RIGHT - 16, rowY);
+    ctx.textAlign = "left";
+    rowY += 36;
+  }
 
+  line(ctx, rowY + 4, C.ruleStrong);
+  rowY += 20;
   ctx.fillStyle = C.muted;
-  ctx.font = sans(19);
-  const hostLabel = config.publicBaseUrl.replace(/^https?:\/\//, "") + "/order";
-  const hostWidth = ctx.measureText(hostLabel).width;
-  ctx.fillText(hostLabel, qrPanelX + (qrSize + 48) / 2 - hostWidth / 2, bandTop + 62 + qrSize + 12);
+  ctx.font = sans(13);
+  ctx.fillText("Amount due in full on this page", X + 16, rowY + 4);
+  ctx.fillStyle = C.ink;
+  ctx.font = sans(13, 500);
+  ctx.textAlign = "right";
+  ctx.fillText("Total", RIGHT - 160, rowY + 2);
+  ctx.font = mono(22, true);
+  ctx.fillText(`${money(order.total_usd)} USD`, RIGHT - 16, rowY);
+  ctx.textAlign = "left";
 
-  // Footer note.
-  const footTop = height - 45 - FOOTER_HEIGHT + 10;
-  ctx.strokeStyle = "rgba(129,72,40,0.62)";
-  ctx.lineWidth = 3;
-  roundRect(ctx, 120, footTop, WIDTH - 240, 62, 24);
-  ctx.stroke();
-  ctx.fillStyle = C.label;
-  ctx.font = sans(23);
-  const note = "Automatically issued by Curialy for this order. Keep it for your records.";
-  const noteWidth = ctx.measureText(note).width;
-  ctx.fillText(note, WIDTH / 2 - noteWidth / 2, footTop + 19);
+  rowY += 56;
+  line(ctx, rowY);
+  rowY += 28;
+
+  kicker(ctx, "Settlement", X, rowY);
+  rowY += 28;
+
+  const netLabel =
+    order.network && order.coin
+      ? `${NETWORK_LABELS[order.network] || order.network} · ${order.coin}`
+      : "Not selected yet";
+
+  const ledger = [
+    ["Payment network", netLabel, false],
+    [
+      "Amount sent",
+      order.expected_amount ? `${order.expected_amount} ${order.coin}` : "—",
+      true,
+    ],
+    ["Destination", order.settlement_address ? shortMiddle(order.settlement_address, 14, 12) : "—", true],
+    [
+      "Transaction",
+      order.tx_hash ? shortMiddle(order.tx_hash, 16, 14) : "Awaiting submission",
+      Boolean(order.tx_hash),
+    ],
+    ["Placed", stamp(order.created_at) || "—", false],
+    ["Payment submitted", stamp(order.submitted_at) || "—", false],
+    ["Completed", stamp(order.completed_at) || "—", false],
+  ];
+
+  const colGap = 28;
+  const colW = (COL - colGap) / 2;
+  ledger.forEach((entry, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const lx = X + col * (colW + colGap);
+    const ly = rowY + row * 58;
+    ctx.fillStyle = C.label;
+    ctx.font = sans(11, 500);
+    ctx.letterSpacing = "0.14em";
+    ctx.fillText(entry[0].toUpperCase(), lx, ly);
+    ctx.letterSpacing = "0";
+    ctx.fillStyle = C.ink;
+    ctx.font = entry[2] ? mono(14) : sans(15);
+    ctx.fillText(entry[1], lx, ly + 20);
+  });
+
+  rowY += Math.ceil(ledger.length / 2) * 58 + 8;
+
+  if (order.admin_note) {
+    kicker(ctx, "Note from Curialy", X, rowY);
+    rowY += 22;
+    ctx.fillStyle = C.ink;
+    ctx.font = sans(14);
+    rowY = drawWrapped(ctx, order.admin_note, X, rowY, COL, 20) + 12;
+  }
+
+  kicker(ctx, "On this document", X, rowY);
+  rowY += 22;
+  ctx.fillStyle = C.muted;
+  ctx.font = sans(13);
+  for (const sentence of [
+    "This receipt is generated automatically when the order is recorded, and again whenever its status changes.",
+    "If the paid plan does not reach the account named above, Curialy refunds the amount on this page.",
+    "Quote the order code to support. Never send a password, recovery phrase, or wallet seed.",
+  ]) {
+    ctx.fillText(sentence, X, rowY);
+    rowY += 20;
+  }
+
+  const foot = H - FOOTER_H;
+  const bandTop = foot - 24 - BAND_H;
+
+  ctx.fillStyle = C.white;
+  ctx.fillRect(X, bandTop, COL, BAND_H);
+  ctx.strokeStyle = C.rule;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(X + 0.5, bandTop + 0.5, COL - 1, BAND_H - 1);
+
+  // Left: barcode bars, then the code, then the quote — stacked, never overlapping.
+  const qrX = RIGHT - 28 - QR_SIZE;
+  const barMaxW = qrX - X - 56;
+
+  kicker(ctx, "Order barcode", X + 24, bandTop + 18);
+
+  const barcode = await buildBarcode(order.order_code);
+  const barW = Math.min(barMaxW, barcode.width);
+  const barY = bandTop + 48;
+  ctx.drawImage(barcode, X + 24, barY, barW, BAR_H);
+
+  const codeY = barY + BAR_H + 16;
+  ctx.fillStyle = C.ink;
+  ctx.font = mono(20, true);
+  ctx.fillText(order.order_code, X + 24, codeY);
+
+  const quoteY = codeY + 32;
+  ctx.fillStyle = C.muted;
+  ctx.font = sans(12);
+  drawWrapped(
+    ctx,
+    "Quote this code to support. Scanning the mark opens the order page.",
+    X + 24,
+    quoteY,
+    barMaxW,
+    18,
+  );
+
+  kicker(ctx, "Verify", qrX, bandTop + 18);
+  const qr = await buildQr(verifyUrl(order), QR_SIZE * 2);
+  ctx.drawImage(qr, qrX, bandTop + 48, QR_SIZE, QR_SIZE);
+  ctx.fillStyle = C.muted;
+  ctx.font = sans(11);
+  const host = `${config.publicBaseUrl.replace(/^https?:\/\//, "")}/order`;
+  const hostW = ctx.measureText(host).width;
+  ctx.fillText(host, qrX + (QR_SIZE - hostW) / 2, bandTop + 48 + QR_SIZE + 10);
+
+  line(ctx, foot, C.ruleStrong);
+  ctx.fillStyle = C.muted;
+  ctx.font = sans(12);
+  ctx.fillText(
+    "Automatically issued by Curialy for this order. Keep the page with your records.",
+    X,
+    foot + 16,
+  );
+  ctx.fillText(
+    "Names identify plan categories only. Curialy is not affiliated with X or Google.  t.me/Curialy",
+    X,
+    foot + 36,
+  );
+  ctx.textAlign = "right";
+  ctx.font = mono(11);
+  ctx.fillText("Page 1 of 1  ·  A4", RIGHT, foot + 26);
+  ctx.textAlign = "left";
 
   return canvas.encode("png");
 }
-
-
-
-
-
-
