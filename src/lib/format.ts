@@ -18,7 +18,8 @@ export function shortAddress(value: string) {
   return `${value.slice(0, 6)}…${value.slice(-4)}`;
 }
 
-export function formatWhen(value: number) {
+/** Accepts an epoch, an ISO string from the API, or a Date. */
+export function formatWhen(value: number | string | Date) {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",

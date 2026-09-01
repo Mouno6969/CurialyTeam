@@ -33,9 +33,48 @@ npm run typecheck
 | `/documentation` | Store reference |
 | `/referrals` | Referral program |
 | `/r/:code` | Referral landing |
-| `/pay/:id` | Network → coin → transfer or connected wallet |
+| `/pay/:id` | Network → coin → manual transfer, then the receipt |
+| `/order` | Customer looks up an order by its code |
+| `/admin` | Operator queue: pending orders, status changes |
 
-Checkout is guest-only: choose a plan, confirm the X handle when needed, then open a payment session stored locally in the browser.
+Checkout is guest-only: choose a plan, confirm the X handle when needed, then an
+order is created server-side and identified by a short code such as
+`CLY-7K3M2QX9`.
+
+## Order service (`server/`)
+
+The storefront is static, but orders are not: `server/` is a small Express + MariaDB
+service that owns order state so the customer, the operator, and the Telegram bot
+all read the same record.
+
+```bash
+cd server
+npm install
+sudo server/deploy.sh          # sync to /srv/curialy-api and restart the unit
+npm run set-webhook            # (re)register the Telegram webhook
+node scripts/preview-receipt.js completed   # render a sample receipt to /tmp
+```
+
+| Piece | Where |
+|---|---|
+| Schema (`orders`, `order_events`, sessions, rate limits) | `server/schema.sql` → database `curialy_team` |
+| Prices, networks, settlement addresses | `server/src/catalog.js` |
+| Receipt PNG (parchment layout, QR + Code128 barcode) | `server/src/receipt.js` |
+| Telegram notifications and inline status buttons | `server/src/telegram.js` |
+| Admin password login, server-side sessions | `server/src/admin.js` |
+
+Prices are resolved server-side from the product and plan keys, never from
+amounts sent by the browser. Order status is only ever changed by the operator —
+from `/admin` or from the Telegram bot — and every transition is appended to
+`order_events`.
+
+Secrets (bot token, admin password hash, database password) live only in
+`/etc/curialy-api/curialy-api.env`, root-owned and mode 600. Nothing in that file
+is referenced by the frontend build.
+
+Statuses: `awaiting_payment` → `pending` (customer submitted a hash, operator
+notified) → `confirming` → `completed` or `rejected`. Unpaid orders become
+`expired` after 30 minutes.
 
 ## Brand
 

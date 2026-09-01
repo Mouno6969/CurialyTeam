@@ -1,0 +1,23 @@
+{
+  "name": "curialy-api",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Order, receipt, and Telegram admin service behind the Curialy storefront",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "set-webhook": "node scripts/set-webhook.js",
+    "smoke": "node scripts/smoke.js"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "1.0.8",
+    "bwip-js": "4.11.4",
+    "express": "5.2.1",
+    "mysql2": "3.24.2",
+    "qrcode": "1.5.4"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}

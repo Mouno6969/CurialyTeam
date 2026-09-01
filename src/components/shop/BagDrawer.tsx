@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useBag } from "@/lib/bag-store";
 import { formatMoney } from "@/lib/format";
-import { createPaymentLink } from "@/lib/payments";
+import { ApiError, createOrder } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
@@ -37,18 +37,27 @@ export function BagDrawer() {
       beginXHandle();
       return;
     }
-    finish();
+    void finish();
   }
 
-  function finish(handle?: string) {
+  async function finish(handle?: string) {
     if (!bag.length) return;
     setPending(true);
     try {
-      const link = createPaymentLink(bag, handle);
+      const order = await createOrder(
+        bag.map((item) => ({
+          productId: item.product.id,
+          planId: item.plan.id,
+          quantity: item.quantity,
+        })),
+        handle,
+      );
       clear();
-      void navigate({ to: "/pay/$id", params: { id: link.publicId } });
-    } catch {
-      setError("Could not open a payment link. Try again.");
+      void navigate({ to: "/pay/$id", params: { id: order.orderCode } });
+    } catch (cause) {
+      setError(
+        cause instanceof ApiError ? cause.message : "Could not open a payment link. Try again.",
+      );
       setPending(false);
     }
   }
@@ -60,7 +69,7 @@ export function BagDrawer() {
       setError("Use 1–15 letters, numbers, or underscores.");
       return;
     }
-    finish(next);
+    void finish(next);
   }
 
   return (

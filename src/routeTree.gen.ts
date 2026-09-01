@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as R404RouteImport } from './routes/404'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as DocumentationRouteImport } from './routes/documentation'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as OrderRouteImport } from './routes/order'
 import { Route as ReferralsRouteImport } from './routes/referrals'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as SupportRouteImport } from './routes/support'
@@ -29,6 +31,11 @@ const R404Route = R404RouteImport.update({
   path: '/404',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DocumentationRoute = DocumentationRouteImport.update({
   id: '/documentation',
   path: '/documentation',
@@ -37,6 +44,11 @@ const DocumentationRoute = DocumentationRouteImport.update({
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrderRoute = OrderRouteImport.update({
+  id: '/order',
+  path: '/order',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReferralsRoute = ReferralsRouteImport.update({
@@ -68,8 +80,10 @@ const RCodeRoute = RCodeRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/404': typeof R404Route
+  '/admin': typeof AdminRoute
   '/documentation': typeof DocumentationRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/order': typeof OrderRoute
   '/referrals': typeof ReferralsRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/support': typeof SupportRoute
@@ -79,8 +93,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/404': typeof R404Route
+  '/admin': typeof AdminRoute
   '/documentation': typeof DocumentationRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/order': typeof OrderRoute
   '/referrals': typeof ReferralsRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/support': typeof SupportRoute
@@ -91,8 +107,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/404': typeof R404Route
+  '/admin': typeof AdminRoute
   '/documentation': typeof DocumentationRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/order': typeof OrderRoute
   '/referrals': typeof ReferralsRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/support': typeof SupportRoute
@@ -104,8 +122,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/404'
+    | '/admin'
     | '/documentation'
     | '/how-it-works'
+    | '/order'
     | '/referrals'
     | '/refund-policy'
     | '/support'
@@ -115,8 +135,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/404'
+    | '/admin'
     | '/documentation'
     | '/how-it-works'
+    | '/order'
     | '/referrals'
     | '/refund-policy'
     | '/support'
@@ -126,8 +148,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/404'
+    | '/admin'
     | '/documentation'
     | '/how-it-works'
+    | '/order'
     | '/referrals'
     | '/refund-policy'
     | '/support'
@@ -138,8 +162,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   R404Route: typeof R404Route
+  AdminRoute: typeof AdminRoute
   DocumentationRoute: typeof DocumentationRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  OrderRoute: typeof OrderRoute
   ReferralsRoute: typeof ReferralsRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   SupportRoute: typeof SupportRoute
@@ -163,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof R404RouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/documentation': {
       id: '/documentation'
       path: '/documentation'
@@ -175,6 +208,13 @@ declare module '@tanstack/react-router' {
       path: '/how-it-works'
       fullPath: '/how-it-works'
       preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/order': {
+      id: '/order'
+      path: '/order'
+      fullPath: '/order'
+      preLoaderRoute: typeof OrderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/referrals': {
@@ -218,8 +258,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   R404Route: R404Route,
+  AdminRoute: AdminRoute,
   DocumentationRoute: DocumentationRoute,
   HowItWorksRoute: HowItWorksRoute,
+  OrderRoute: OrderRoute,
   ReferralsRoute: ReferralsRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   SupportRoute: SupportRoute,

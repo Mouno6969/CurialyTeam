@@ -1,0 +1,40 @@
+[Unit]
+Description=Curialy order API (orders, receipts, Telegram admin)
+Documentation=https://github.com/Mouno6969/CurialyTeam
+After=network-online.target mariadb.service
+Wants=network-online.target
+Requires=mariadb.service
+
+[Service]
+Type=simple
+User=curialyapi
+Group=curialyapi
+WorkingDirectory=/srv/curialy-api
+EnvironmentFile=/etc/curialy-api/curialy-api.env
+ExecStart=/usr/bin/node src/index.js
+Restart=always
+RestartSec=5s
+
+# Binds 127.0.0.1 only (HOST in the env file); Caddy reverse-proxies /api to it.
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+# Node's JIT needs writable-executable pages, so W^X cannot be enforced here.
+MemoryDenyWriteExecute=no
+
+[Install]
+WantedBy=multi-user.target
