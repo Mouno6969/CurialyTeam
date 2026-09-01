@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Google AI">
+  <!-- Replaced the Google Search wordmark with the official Gemini spark. -->
+  <defs>
+    <linearGradient id="google-ai-spark" x1="8" y1="56" x2="56" y2="8" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4285F4"/>
+      <stop offset="0.35" stop-color="#9B72CB"/>
+      <stop offset="0.68" stop-color="#D96570"/>
+      <stop offset="1" stop-color="#EF6C3F"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#google-ai-spark)" d="M28 4C28 16.15 16.15 28 4 28C16.15 28 28 39.85 28 52C28 39.85 39.85 28 52 28C39.85 28 28 16.15 28 4Z"/>
+  <path fill="url(#google-ai-spark)" d="M50 36C50 41.52 44.52 47 39 47C44.52 47 50 52.48 50 58C50 52.48 55.48 47 61 47C55.48 47 50 41.52 50 36Z"/>
+</svg>
