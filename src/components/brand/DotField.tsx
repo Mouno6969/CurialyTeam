@@ -53,9 +53,9 @@ export function BrokenRing({ className }: { className?: string }) {
 export function Rule({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-3", className)} aria-hidden="true">
-      <span className="h-px flex-1 bg-border" />
-      <span className="rule-diamond" />
-      <span className="h-px flex-1 bg-border" />
+      <span className="rule-line h-px flex-1 origin-left bg-border" />
+      <span className="rule-diamond diamond-pulse" />
+      <span className="rule-line h-px flex-1 origin-right bg-border" />
     </div>
   );
 }

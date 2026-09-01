@@ -14,6 +14,7 @@ import { Route as R404RouteImport } from './routes/404'
 import { Route as DocumentationRouteImport } from './routes/documentation'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ReferralsRouteImport } from './routes/referrals'
+import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as PayIdRouteImport } from './routes/pay.$id'
 import { Route as RCodeRouteImport } from './routes/r.$code'
@@ -43,6 +44,11 @@ const ReferralsRoute = ReferralsRouteImport.update({
   path: '/referrals',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RefundPolicyRoute = RefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/documentation': typeof DocumentationRoute
   '/how-it-works': typeof HowItWorksRoute
   '/referrals': typeof ReferralsRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/support': typeof SupportRoute
   '/pay/$id': typeof PayIdRoute
   '/r/$code': typeof RCodeRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/documentation': typeof DocumentationRoute
   '/how-it-works': typeof HowItWorksRoute
   '/referrals': typeof ReferralsRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/support': typeof SupportRoute
   '/pay/$id': typeof PayIdRoute
   '/r/$code': typeof RCodeRoute
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/documentation': typeof DocumentationRoute
   '/how-it-works': typeof HowItWorksRoute
   '/referrals': typeof ReferralsRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/support': typeof SupportRoute
   '/pay/$id': typeof PayIdRoute
   '/r/$code': typeof RCodeRoute
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/documentation'
     | '/how-it-works'
     | '/referrals'
+    | '/refund-policy'
     | '/support'
     | '/pay/$id'
     | '/r/$code'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/documentation'
     | '/how-it-works'
     | '/referrals'
+    | '/refund-policy'
     | '/support'
     | '/pay/$id'
     | '/r/$code'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/documentation'
     | '/how-it-works'
     | '/referrals'
+    | '/refund-policy'
     | '/support'
     | '/pay/$id'
     | '/r/$code'
@@ -129,6 +141,7 @@ export interface RootRouteChildren {
   DocumentationRoute: typeof DocumentationRoute
   HowItWorksRoute: typeof HowItWorksRoute
   ReferralsRoute: typeof ReferralsRoute
+  RefundPolicyRoute: typeof RefundPolicyRoute
   SupportRoute: typeof SupportRoute
   PayIdRoute: typeof PayIdRoute
   RCodeRoute: typeof RCodeRoute
@@ -171,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReferralsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/refund-policy': {
+      id: '/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/support': {
       id: '/support'
       path: '/support'
@@ -201,6 +221,7 @@ const rootRouteChildren: RootRouteChildren = {
   DocumentationRoute: DocumentationRoute,
   HowItWorksRoute: HowItWorksRoute,
   ReferralsRoute: ReferralsRoute,
+  RefundPolicyRoute: RefundPolicyRoute,
   SupportRoute: SupportRoute,
   PayIdRoute: PayIdRoute,
   RCodeRoute: RCodeRoute,

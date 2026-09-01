@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Check, ChevronRight } from "lucide-react";
 import { DotField, RadialMatrix, Rule } from "@/components/brand/DotField";
-import { Logo } from "@/components/brand/Logo";
 import { SiteChrome } from "@/components/layout/SiteChrome";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { TypeLine } from "@/components/shop/TypeLine";
@@ -19,17 +18,17 @@ const STEPS = [
 function Home() {
   return (
     <SiteChrome>
-      <section className="page-wrap py-8 sm:py-12 lg:py-16">
+      <section className="page-wrap pt-8 pb-4 sm:pt-12 sm:pb-6 lg:pt-14 lg:pb-8">
         <div className="relative overflow-hidden rounded-2xl bg-card px-6 py-10 shadow-[var(--shadow-border)] sm:px-10 sm:py-14 lg:px-14 lg:py-16">
           <DotField />
-          <RadialMatrix className="pointer-events-none absolute -right-24 top-1/2 hidden size-[28rem] -translate-y-1/2 opacity-50 breathe lg:block xl:size-[34rem]" />
-          <div className="relative grid items-center gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:gap-12">
-            <div className="order-2 max-w-2xl lg:order-1">
-              <div className="reveal flex items-center gap-3">
+          <RadialMatrix className="pointer-events-none absolute -right-28 top-[-12%] hidden size-[30rem] opacity-40 breathe lg:block xl:size-[34rem]" />
+          <div className="relative grid items-center gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.78fr)] lg:gap-16">
+            <div className="max-w-2xl">
+              <div className="kicker-in flex items-center gap-3">
                 <span className="kicker">A considered digital shop</span>
-                <span className="hidden h-px w-10 bg-border sm:block" />
+                <span className="rule-line hidden h-px w-12 origin-left bg-border sm:block" />
               </div>
-              <h1 className="reveal reveal-d1 display-xl mt-5 text-foreground">
+              <h1 className="reveal reveal-d1 display-xl mt-6 text-foreground">
                 Subscriptions,
                 <br />
                 <TypeLine />
@@ -49,7 +48,7 @@ function Home() {
                   <Link to="/how-it-works">How it works</Link>
                 </Button>
               </div>
-              <ol className="reveal reveal-d5 mt-10 hidden gap-6 sm:flex">
+              <ol className="reveal reveal-d5 mt-11 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6">
                 {STEPS.map((step, index) => (
                   <li key={step.n} className="flex items-center gap-3 text-sm">
                     <span className="font-mono-ui text-[10px] tracking-[0.16em] text-muted-foreground">
@@ -63,24 +62,20 @@ function Home() {
                 ))}
               </ol>
             </div>
-            <div className="order-1 flex flex-col items-center gap-6 lg:order-2">
-              <div className="emblem-in relative grid place-items-center">
-                <RadialMatrix className="absolute size-64 opacity-70 breathe sm:size-72 lg:hidden" />
-                <Logo
-                  size={220}
-                  className="relative z-10 size-40 sm:size-48 lg:size-[13.5rem]"
-                />
-              </div>
-              <div className="hidden w-full max-w-sm rounded-xl bg-secondary/80 p-5 shadow-[var(--shadow-border)] lg:block">
+            <aside className="hidden lg:block">
+              <div className="ledger-in rounded-xl bg-secondary/80 p-6 shadow-[var(--shadow-border)]">
                 <div className="flex items-center justify-between border-b border-border pb-3">
                   <span className="kicker">Plan picker</span>
                   <span className="rounded-full bg-card px-2.5 py-1 font-mono-ui text-[10px] tracking-[0.12em] text-muted-foreground">
                     Ready
                   </span>
                 </div>
-                <div className="space-y-3 py-4">
+                <div className="space-y-3 py-5">
                   {STEPS.map((step, index) => (
-                    <div key={step.n} className="flex items-center gap-3">
+                    <div
+                      key={step.n}
+                      className={`ledger-row flex items-center gap-3 ledger-d${index + 1}`}
+                    >
                       <span className="font-mono-ui flex size-7 items-center justify-center rounded-full bg-card text-[10px] shadow-[var(--shadow-border)]">
                         {step.n}
                       </span>
@@ -93,7 +88,7 @@ function Home() {
                     </div>
                   ))}
                 </div>
-                <div className="rounded-lg bg-primary px-4 py-3 text-primary-foreground">
+                <div className="rounded-lg bg-primary px-4 py-3.5 text-primary-foreground">
                   <p className="font-display text-xl tracking-[-0.03em] text-primary-foreground">
                     Everything at a glance.
                   </p>
@@ -102,13 +97,13 @@ function Home() {
                   </p>
                 </div>
               </div>
-            </div>
+            </aside>
           </div>
         </div>
       </section>
 
-      <section id="plans" className="page-wrap scroll-mt-24 pb-16 sm:pb-20">
-        <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+      <section id="plans" className="page-wrap scroll-mt-24 py-12 sm:py-16">
+        <div className="mb-9 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <p className="kicker">The shop</p>
             <h2 className="display mt-2 text-3xl">Choose your plan.</h2>
@@ -118,13 +113,15 @@ function Home() {
           </p>
         </div>
         <div className="grid gap-5 md:grid-cols-2">
-          {catalog.map((product) => (
-            <ProductCard product={product} key={product.id} />
+          {catalog.map((product, index) => (
+            <div key={product.id} className={`card-enter card-d${index + 1}`}>
+              <ProductCard product={product} />
+            </div>
           ))}
         </div>
         <Link
           to="/referrals"
-          className="group mt-6 block rounded-xl bg-card p-5 shadow-[var(--shadow-border)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-border-hover)]"
+          className="group mt-6 block rounded-xl bg-card p-5 shadow-[var(--shadow-border)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-border-hover)] sm:p-6"
         >
           <p className="kicker">Referral rewards</p>
           <h3 className="mt-2 font-display text-2xl tracking-[-0.03em]">Invite and earn.</h3>
@@ -132,13 +129,13 @@ function Home() {
             Open the referral program, get your link, and track eligible reward activity.
           </p>
           <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium">
-            Explore rewards <ArrowRight className="size-4" />
+            Explore rewards <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
           </span>
         </Link>
       </section>
 
       <section className="border-y border-border bg-secondary/60 py-14 sm:py-16">
-        <div className="page-wrap grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+        <div className="page-wrap grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-end lg:gap-20">
           <div>
             <p className="kicker">Guided by design</p>
             <h2 className="display mt-3 max-w-sm text-3xl">
@@ -157,20 +154,20 @@ function Home() {
               {
                 n: "02",
                 title: "Support",
-                copy: "Find clear answers before you request.",
+                copy: "Write to a person on Telegram.",
                 href: "/support" as const,
               },
               {
                 n: "03",
-                title: "Documentation",
-                copy: "Read the complete store reference.",
-                href: "/documentation" as const,
+                title: "Refunds",
+                copy: "If an order never arrives, we refund it.",
+                href: "/refund-policy" as const,
               },
             ].map((item) => (
               <Link
                 key={item.n}
                 to={item.href}
-                className="rounded-xl bg-card p-5 shadow-[var(--shadow-border)] transition-[transform] duration-200 hover:-translate-y-1"
+                className="rounded-xl bg-card p-5 shadow-[var(--shadow-border)] transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-[var(--shadow-border-hover)]"
               >
                 <p className="kicker">{item.n}</p>
                 <h3 className="mt-5 text-base font-semibold">{item.title}</h3>

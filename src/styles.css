@@ -181,8 +181,8 @@ html[data-theme="light"] {
     font-family: var(--font-display);
     font-weight: 400;
     letter-spacing: -0.048em;
-    line-height: 0.88;
-    font-size: clamp(3.05rem, 1.15rem + 7vw, 6.35rem);
+    line-height: 0.9;
+    font-size: clamp(2.65rem, 1.05rem + 5.4vw, 5.05rem);
   }
 
   .type-line {
@@ -201,6 +201,28 @@ html[data-theme="light"] {
 
   .radial-matrix {
     mix-blend-mode: screen;
+  }
+
+  .nav-link {
+    position: relative;
+  }
+
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -8px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--motion-fast) var(--ease-smooth-out);
+  }
+
+  .nav-link:hover::after,
+  .nav-link.is-active::after {
+    transform: scaleX(1);
   }
 }
 
@@ -276,6 +298,60 @@ html[data-theme="light"] .radial-matrix {
   }
 }
 
+@keyframes rule-draw {
+  from {
+    transform: scaleX(0);
+    opacity: 0.2;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes kicker-in {
+  from {
+    opacity: 0;
+    letter-spacing: 0.32em;
+  }
+  to {
+    opacity: 1;
+    letter-spacing: 0.18em;
+  }
+}
+
+@keyframes ledger-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes diamond-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .reveal {
   animation: reveal-up var(--motion-slow) var(--ease-smooth-out) both;
 }
@@ -318,6 +394,47 @@ html[data-theme="light"] .radial-matrix {
   animation: emblem-in var(--motion-emphasis) var(--ease-smooth-out) both;
 }
 
+.rule-line {
+  animation: rule-draw 720ms var(--ease-smooth-out) both;
+}
+
+.kicker-in {
+  animation: kicker-in 700ms var(--ease-smooth-out) both;
+}
+
+.ledger-in {
+  animation: ledger-in 620ms 180ms var(--ease-smooth-out) both;
+}
+
+.ledger-row {
+  animation: ledger-in 520ms var(--ease-smooth-out) both;
+}
+
+.ledger-d1 {
+  animation-delay: 280ms;
+}
+.ledger-d2 {
+  animation-delay: 380ms;
+}
+.ledger-d3 {
+  animation-delay: 480ms;
+}
+
+.diamond-pulse {
+  animation: diamond-pulse 4.8s ease-in-out infinite;
+}
+
+.card-enter {
+  animation: card-enter 560ms var(--ease-smooth-out) both;
+}
+
+.card-d1 {
+  animation-delay: 80ms;
+}
+.card-d2 {
+  animation-delay: 180ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal,
   .reveal-d1,
@@ -328,7 +445,17 @@ html[data-theme="light"] .radial-matrix {
   .caret,
   .spin-slow,
   .breathe,
-  .emblem-in {
+  .emblem-in,
+  .rule-line,
+  .kicker-in,
+  .ledger-in,
+  .ledger-row,
+  .diamond-pulse,
+  .card-enter {
     animation: none !important;
+  }
+
+  .nav-link::after {
+    transition: none;
   }
 }

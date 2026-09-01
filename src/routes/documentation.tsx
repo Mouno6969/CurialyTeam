@@ -28,8 +28,13 @@ const guidance = [
   },
   {
     id: "05",
-    title: "Before contacting support",
-    copy: "Confirm the requested duration, current availability, applicable eligibility requirements, and any provider terms relevant to your request.",
+    title: "Human support",
+    copy: "Questions go to @Curialy on Telegram. A person reads the desk. Include the payment-link reference when the matter is about a specific order.",
+  },
+  {
+    id: "06",
+    title: "Refunds",
+    copy: "If a paid order fails to reach the account you named, we refund it. The full wording lives on the refund policy page.",
   },
 ];
 
@@ -83,9 +88,14 @@ function Documentation() {
               Return to the storefront to see current status and available plan options.
             </p>
           </div>
-          <Button asChild>
-            <Link to="/">Visit the store</Link>
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button asChild>
+              <Link to="/">Visit the store</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/refund-policy">Refund policy</Link>
+            </Button>
+          </div>
         </div>
       </section>
     </SiteChrome>

@@ -1,6 +1,6 @@
 # Curialy
 
-Independent digital subscription storefront. Classical dark shop: Instrument type, radial dot field, official X and Google AI marks, guest bag → X handle → payment link.
+Independent digital subscription storefront. Classical dark shop: Instrument type, radial dots, official X and Google AI marks, guest bag → X handle → payment link.
 
 This is the complete Grok-built storefront. It does **not** reuse the previous Manus / Express / tRPC codebase.
 
@@ -16,29 +16,30 @@ This is the complete Grok-built storefront. It does **not** reuse the previous M
 
 ```bash
 npm install
-npm run dev       # local shop
-npm run build     # production bundle in dist/
-npm run preview   # serve the production bundle
+npm run dev
+npm run build
+npm run preview
 npm run typecheck
 ```
 
-## What you get
+## Pages
 
 | Path | Page |
 |---|---|
 | `/` | Shop — plans, bag, typewriter hero |
 | `/how-it-works` | Guest flow |
-| `/support` | Support topics |
+| `/support` | Human desk on Telegram `@Curialy` |
+| `/refund-policy` | If a paid order never arrives, it is refunded |
 | `/documentation` | Store reference |
 | `/referrals` | Referral program |
 | `/r/:code` | Referral landing |
-| `/pay/:id` | Network → coin → manual transfer or connected wallet |
+| `/pay/:id` | Network → coin → transfer or connected wallet |
 
-Checkout is guest-only: choose a plan, confirm the X handle when needed, then open a payment session stored locally in the browser. Wire a real settlement backend when you are ready to take live funds.
+Checkout is guest-only: choose a plan, confirm the X handle when needed, then open a payment session stored locally in the browser.
 
 ## Brand
 
-- Photo C mark: `public/brand/curialy-logo.jpg`
+- Photo C mark in the header only
 - Official X logomark
-- Official Google Gemini / Google AI spark (not the Google Search wordmark)
+- Official Google Gemini / Google AI spark
 - Fonts: Instrument Serif, Instrument Sans, IBM Plex Mono

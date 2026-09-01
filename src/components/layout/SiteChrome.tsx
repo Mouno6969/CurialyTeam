@@ -6,7 +6,7 @@ import { DotVeil, Rule } from "@/components/brand/DotField";
 import { BagDrawer } from "@/components/shop/BagDrawer";
 import { Button } from "@/components/ui/button";
 import { useBag } from "@/lib/bag-store";
-import { storefrontNavigation } from "@/lib/navigation";
+import { footerNavigation, storefrontNavigation } from "@/lib/navigation";
 import { useTheme } from "@/lib/theme-store";
 import { cn } from "@/lib/utils";
 
@@ -33,12 +33,12 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
           </p>
         </div>
         <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-xl">
-          <div className="page-wrap flex h-[72px] items-center justify-between gap-3">
+          <div className="page-wrap flex h-16 items-center justify-between gap-3 sm:h-[72px]">
             <Link to="/" className="shrink-0" aria-label="Curialy home">
               <BrandLockup />
             </Link>
             <nav
-              className="hidden items-center gap-7 text-[13px] font-medium tracking-[-0.01em] text-muted-foreground lg:flex"
+              className="hidden items-center gap-8 text-[13px] font-medium tracking-[-0.01em] text-muted-foreground lg:flex"
               aria-label="Primary navigation"
             >
               {storefrontNavigation.map((item) => (
@@ -46,8 +46,8 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
                   key={item.href}
                   to={item.href}
                   className={cn(
-                    "transition-colors duration-150 hover:text-foreground",
-                    pathname === item.href && "text-foreground",
+                    "nav-link transition-colors duration-150 hover:text-foreground",
+                    pathname === item.href && "is-active text-foreground",
                   )}
                 >
                   {item.label}
@@ -77,7 +77,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <nav
-            className="page-wrap flex gap-2 overflow-x-auto py-2.5 text-xs font-semibold text-muted-foreground lg:hidden"
+            className="page-wrap flex gap-1 overflow-x-auto py-2 text-xs font-semibold text-muted-foreground lg:hidden"
             aria-label="Mobile primary navigation"
           >
             {storefrontNavigation.map((item) => (
@@ -97,19 +97,35 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
           </nav>
         </header>
         <main>{children}</main>
-        <footer className="border-t border-border py-12">
+        <footer className="border-t border-border py-12 sm:py-14">
           <div className="page-wrap">
             <Rule className="mb-8 max-w-xs" />
-            <div className="flex flex-col gap-6 text-xs leading-5 text-muted-foreground md:flex-row md:items-end md:justify-between">
+            <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
               <div>
                 <BrandLockup markSize={28} />
-                <p className="mt-4 max-w-xl">
+                <p className="mt-4 max-w-xl text-xs leading-5 text-muted-foreground">
                   © {new Date().getFullYear()} Curialy. Names may be used only to identify
                   compatible plan categories. This independent store is not affiliated with
                   third-party providers.
                 </p>
               </div>
-              <p className="kicker">Simple digital commerce</p>
+              <div className="flex flex-col items-start gap-4 md:items-end">
+                <nav
+                  className="flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-muted-foreground"
+                  aria-label="Footer"
+                >
+                  {footerNavigation.map((item) => (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      className="transition-colors duration-150 hover:text-foreground"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </nav>
+                <p className="kicker">Simple digital commerce</p>
+              </div>
             </div>
           </div>
         </footer>
