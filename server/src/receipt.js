@@ -213,15 +213,53 @@ function drawWrapped(ctx, text, x, y, maxWidth, lineHeight) {
 }
 
 /**
+ * Line count `drawWrapped` would produce, without drawing. Must mirror the
+ * wrapping above exactly: the page height is derived from this, and if it
+ * under-counts, the closing notices slide underneath the verification band.
+ * Assumes the caller has already set ctx.font to the drawing font.
+ */
+function countWrapped(ctx, text, maxWidth) {
+  const words = String(text ?? "").split(/\s+/).filter(Boolean);
+  if (words.length === 0) return 0;
+  let line = "";
+  let lines = 0;
+  for (const word of words) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (ctx.measureText(candidate).width <= maxWidth) {
+      line = candidate;
+      continue;
+    }
+    if (line) lines += 1;
+    line = word;
+  }
+  if (line) lines += 1;
+  return lines;
+}
+
+// Fixed vertical costs of the lower half of the page, measured against the
+// draw order below: table rows start at 366, then the total block, the rule,
+// the settlement heading, the two-column ledger, and the closing notices.
+const LEDGER_ROWS = 4;
+const NOTICE_LINES = 3;
+const CONTENT_BASE = 366 + 20 + 56 + 28 + 28 + (LEDGER_ROWS * 58 + 8) + 22 + NOTICE_LINES * 20;
+
+/**
  * Renders the receipt for an order row as a PNG buffer.
  * The status chip reflects the order at render time, so the same URL
  * yields PENDING REVIEW before the admin acts and COMPLETED afterwards.
  */
 export async function renderReceipt(order) {
   const items = parseItems(order);
-  const extraRows = Math.max(0, items.length - 1);
-  const noteLines = order.admin_note ? 2 : 0;
-  const contentBottom = 780 + extraRows * 36 + noteLines * 22;
+
+  // Size the page from the real wrapped height of the note, not an estimate:
+  // a long note plus many line items otherwise pushes the closing notices
+  // under the verification band, hiding the refund and seed-phrase warnings.
+  const probe = createCanvas(PAGE_W, 10).getContext("2d");
+  probe.font = sans(14);
+  const noteBlock = order.admin_note
+    ? 22 + countWrapped(probe, order.admin_note, COL) * 20 + 12
+    : 0;
+  const contentBottom = CONTENT_BASE + items.length * 36 + noteBlock;
   const minForBand = contentBottom + 28 + BAND_H + FOOTER_H + 36;
   const H = Math.max(PAGE_H, minForBand);
 
@@ -333,11 +371,15 @@ export async function renderReceipt(order) {
   ctx.font = sans(13);
   ctx.fillText("Amount due in full on this page", X + 16, rowY + 4);
   ctx.fillStyle = C.ink;
-  ctx.font = sans(13, 500);
   ctx.textAlign = "right";
-  ctx.fillText("Total", RIGHT - 160, rowY + 2);
+  // "Total" is placed off the measured width of the amount, not a fixed
+  // offset: a two-digit total is wide enough to run over a fixed label.
   ctx.font = mono(22, true);
-  ctx.fillText(`${money(order.total_usd)} USD`, RIGHT - 16, rowY);
+  const totalText = `${money(order.total_usd)} USD`;
+  const totalWidth = ctx.measureText(totalText).width;
+  ctx.fillText(totalText, RIGHT - 16, rowY);
+  ctx.font = sans(13, 500);
+  ctx.fillText("Total", RIGHT - 16 - totalWidth - 18, rowY + 2);
   ctx.textAlign = "left";
 
   rowY += 56;
