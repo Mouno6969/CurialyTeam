@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Curialy — Advertisement</title>
   <style>
     :root {
@@ -11,7 +11,7 @@
       --fg: #f4f4f5;
       --muted: #a1a1aa;
       --card: #111114;
-      --border: rgba(244, 244, 245, 0.1);
+      --border: rgba(244, 244, 245, 0.12);
     }
     * { box-sizing: border-box; }
     html, body {
@@ -19,86 +19,93 @@
       min-height: 100%;
       background: var(--bg);
       color: var(--fg);
-      font-family: "Segoe UI", system-ui, sans-serif;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      -webkit-text-size-adjust: 100%;
     }
     body {
-      display: grid;
-      place-items: center;
-      padding: 2rem 1.25rem 3rem;
-      gap: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.25rem 1rem 2.5rem;
+      gap: 1rem;
     }
-    header {
-      width: min(960px, 100%);
-      text-align: center;
-    }
+    header { width: min(960px, 100%); text-align: center; }
     .kicker {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--muted);
-      margin: 0 0 0.6rem;
+      margin: 0 0 0.5rem;
     }
     h1 {
-      font-family: Georgia, "Iowan Old Style", serif;
+      font-family: Georgia, serif;
       font-weight: 400;
       letter-spacing: -0.03em;
-      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
       margin: 0;
       line-height: 1.05;
     }
     p.sub {
-      margin: 0.75rem 0 0;
+      margin: 0.6rem 0 0;
       color: var(--muted);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
     .stage {
       width: min(960px, 100%);
-      background: var(--card);
+      background: #000;
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 24px 60px -36px rgb(0 0 0 / 0.7);
     }
     video {
       display: block;
       width: 100%;
       height: auto;
+      max-height: 70vh;
       background: #000;
       aspect-ratio: 16 / 9;
     }
     .actions {
       width: min(960px, 100%);
       display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      justify-content: center;
+      flex-direction: column;
+      gap: 0.65rem;
     }
     a.btn {
-      display: inline-flex;
+      display: flex;
       align-items: center;
+      justify-content: center;
       gap: 0.5rem;
-      padding: 0.7rem 1.15rem;
+      padding: 0.95rem 1.1rem;
       border-radius: 999px;
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 1rem;
       font-weight: 600;
       border: 1px solid var(--border);
       color: var(--fg);
       background: transparent;
-      transition: background 150ms ease, transform 150ms ease;
+      text-align: center;
     }
-    a.btn:hover { background: rgba(255,255,255,0.06); transform: translateY(-1px); }
     a.btn.primary {
       background: #ececec;
       color: #09090b;
       border-color: transparent;
     }
-    a.btn.primary:hover { background: #fff; }
-    footer {
+    a.btn.secondary {
+      background: #18181c;
+    }
+    .note {
       width: min(960px, 100%);
-      text-align: center;
       color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.5;
+      text-align: center;
+    }
+    .note a { color: #e4e4e7; }
+    .status {
       font-size: 0.8rem;
+      color: var(--muted);
+      min-height: 1.2em;
     }
   </style>
 </head>
@@ -106,31 +113,58 @@
   <header>
     <p class="kicker">Curialy brand film</p>
     <h1>Advertisement</h1>
-    <p class="sub">28 seconds · 1080p · priced clearly, paid privately</p>
+    <p class="sub">28 seconds · 1080p · ~6 MB</p>
   </header>
 
   <div class="stage">
     <video
+      id="player"
       controls
-      autoplay
       playsinline
+      webkit-playsinline
       preload="auto"
-      poster=""
-      src="./Curialy-Advertisement.mp4"
+      controlslist="nodownload"
     >
-      Your browser does not support the video tag.
-      <a href="./Curialy-Advertisement.mp4">Download the video</a>
+      <source src="./Curialy-Advertisement.mp4" type="video/mp4" />
+      <source src="https://raw.githubusercontent.com/Mouno6969/CurialyTeam/arena/01a08bc2-curialyteam/ad/Curialy-Advertisement.mp4" type="video/mp4" />
     </video>
   </div>
+  <p class="status" id="status">Loading video…</p>
 
   <div class="actions">
-    <a class="btn primary" href="./Curialy-Advertisement.mp4" download>Download MP4 (6 MB)</a>
-    <a class="btn" href="./curialy-ad.mp4" download>Download master (47 MB)</a>
-    <a class="btn" href="./voiceover.mp3" download>Download voiceover</a>
+    <a
+      class="btn primary"
+      href="https://github.com/Mouno6969/CurialyTeam/raw/arena/01a08bc2-curialyteam/ad/Curialy-Advertisement.mp4"
+    >Download video (opens on phone)</a>
+    <a
+      class="btn secondary"
+      href="https://raw.githubusercontent.com/Mouno6969/CurialyTeam/arena/01a08bc2-curialyteam/ad/Curialy-Advertisement.mp4"
+      download="Curialy-Advertisement.mp4"
+    >Direct MP4 link</a>
+    <a class="btn" href="./Curialy-Advertisement.mp4" download="Curialy-Advertisement.mp4">Local file download</a>
   </div>
 
-  <footer>
-    Play above, or use Download if your browser blocks inline media.
-  </footer>
+  <p class="note">
+    If the player is blank, tap <strong>Download video</strong> — that opens the MP4 in your browser or Files app so you can play it.
+    <br /><br />
+    GitHub file:
+    <a href="https://github.com/Mouno6969/CurialyTeam/blob/arena/01a08bc2-curialyteam/ad/Curialy-Advertisement.mp4">
+      ad/Curialy-Advertisement.mp4
+    </a>
+  </p>
+
+  <script>
+    const v = document.getElementById("player");
+    const status = document.getElementById("status");
+    v.addEventListener("loadeddata", () => {
+      status.textContent = "Ready — tap play";
+      v.play().catch(() => { status.textContent = "Ready — tap the play button"; });
+    });
+    v.addEventListener("error", () => {
+      status.textContent = "Inline play blocked — use Download video below";
+    });
+    // Kick load
+    v.load();
+  </script>
 </body>
 </html>
