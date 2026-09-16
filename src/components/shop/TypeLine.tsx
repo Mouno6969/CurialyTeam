@@ -1,19 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useI18n, useT } from "@/lib/i18n";
 
 export function TypeLine() {
   const t = useT();
   const locale = useI18n((s) => s.locale);
-  const lines = [t("home.type.simple"), t("home.type.priced"), t("home.type.paid")];
+  const lines = useMemo(
+    () => [t("home.type.simple"), t("home.type.priced"), t("home.type.paid")],
+    [t],
+  );
   const [index, setIndex] = useState(0);
   const [text, setText] = useState(lines[0]);
   const [phase, setPhase] = useState<"type" | "hold" | "erase">("hold");
+  const localeRef = useRef(locale);
 
-  useEffect(() => {
+  if (localeRef.current !== locale) {
+    localeRef.current = locale;
     setIndex(0);
     setText(lines[0]);
     setPhase("hold");
-  }, [locale]);
+  }
 
   useEffect(() => {
     const reduced =
@@ -43,7 +48,7 @@ export function TypeLine() {
     }
 
     return () => window.clearTimeout(timeout);
-  }, [index, phase, text, locale]);
+  }, [index, phase, text, lines]);
 
   return (
     <em className="type-line font-display font-normal italic text-muted-foreground">

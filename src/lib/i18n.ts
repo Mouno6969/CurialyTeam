@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { create } from "zustand";
 import { en, type MessageKey } from "@/lib/locales/en";
 import { zh } from "@/lib/locales/zh";
@@ -22,8 +23,9 @@ function readStored(): Locale | null {
 
 function applyLocale(locale: Locale) {
   if (typeof document === "undefined") return;
-  document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
-  document.documentElement.dataset.locale = locale;
+  const root = document.documentElement;
+  root.lang = locale === "zh" ? "zh-CN" : "en";
+  root.dataset.locale = locale;
 }
 
 function interpolate(template: string, vars?: Record<string, string | number>) {
@@ -40,18 +42,24 @@ type I18nState = {
   setLocale: (locale: Locale) => void;
 };
 
-export const useI18n = create<I18nState>()((set) => ({
+export const useI18n = create<I18nState>()((set, get) => ({
   locale: "en",
   ready: false,
   hydrate: () => {
+    if (get().ready) return;
     const locale = readStored() ?? detectLocale();
     applyLocale(locale);
     set({ locale, ready: true });
   },
   setLocale: (locale) => {
-    localStorage.setItem(STORAGE_KEY, locale);
+    if (get().locale === locale) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, locale);
+    } catch {
+      /* private mode */
+    }
     applyLocale(locale);
-    set({ locale });
+    set({ locale, ready: true });
   },
 }));
 
@@ -66,7 +74,10 @@ export function t(
 
 export function useT() {
   const locale = useI18n((s) => s.locale);
-  return (key: MessageKey, vars?: Record<string, string | number>) => t(locale, key, vars);
+  return useCallback(
+    (key: MessageKey, vars?: Record<string, string | number>) => t(locale, key, vars),
+    [locale],
+  );
 }
 
 export function planLabel(locale: Locale, planId: string) {

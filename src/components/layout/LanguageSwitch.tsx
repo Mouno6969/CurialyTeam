@@ -25,7 +25,7 @@ export function LanguageSwitch() {
             onClick={() => setLocale(option.id)}
             aria-pressed={active}
             className={cn(
-              "h-7 rounded-sm px-2 text-[11px] font-semibold tracking-[0.04em] transition-colors duration-150",
+              "h-7 rounded-sm px-2 text-[11px] font-semibold tracking-[0.04em]",
               active
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground",

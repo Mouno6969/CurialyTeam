@@ -24,8 +24,8 @@
   --color-paper: #f6f3ec;
   --color-ink: #16161a;
 
-  --font-sans: "Instrument Sans", "Noto Sans SC", "Segoe UI", system-ui, sans-serif;
-  --font-display: "Instrument Serif", "Noto Serif SC", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Instrument Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Instrument Serif", "Songti SC", "STSong", "Noto Serif SC", "SimSun", "Iowan Old Style", Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
 
   --radius-xs: 4px;
