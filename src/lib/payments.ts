@@ -2,8 +2,8 @@
 // server (see @/lib/api) — this file only describes how networks and coins are
 // labelled and which logo belongs to each.
 
-export type NetworkKey = "ethereum" | "solana" | "polygon";
-export type CoinSymbol = "USDC" | "USDT" | "ETH" | "SOL" | "POL";
+export type NetworkKey = "ethereum" | "solana" | "polygon" | "bnb" | "avalanche" | "base";
+export type CoinSymbol = "USDC" | "USDT" | "ETH" | "SOL" | "POL" | "BNB" | "AVAX";
 
 export type NetworkOption = {
   key: NetworkKey;
@@ -31,6 +31,24 @@ export const networks: NetworkOption[] = [
     coins: ["USDC", "USDT", "POL"],
     logo: "/brand/net-polygon.svg",
   },
+  {
+    key: "bnb",
+    label: "BNB Chain",
+    coins: ["USDC", "USDT", "BNB"],
+    logo: "/brand/net-bnb.svg",
+  },
+  {
+    key: "avalanche",
+    label: "Avalanche C-Chain",
+    coins: ["USDC", "USDT", "AVAX"],
+    logo: "/brand/net-avalanche.svg",
+  },
+  {
+    key: "base",
+    label: "Base",
+    coins: ["USDC", "USDT", "ETH"],
+    logo: "/brand/net-base.svg",
+  },
 ];
 
 export const coinKind: Record<CoinSymbol, "stablecoin" | "native"> = {
@@ -39,6 +57,8 @@ export const coinKind: Record<CoinSymbol, "stablecoin" | "native"> = {
   ETH: "native",
   SOL: "native",
   POL: "native",
+  BNB: "native",
+  AVAX: "native",
 };
 
 export const coinLabel: Record<CoinSymbol, string> = {
@@ -47,6 +67,8 @@ export const coinLabel: Record<CoinSymbol, string> = {
   ETH: "Ether",
   SOL: "Solana",
   POL: "Polygon",
+  BNB: "BNB",
+  AVAX: "Avalanche",
 };
 
 export const coinLogo: Record<CoinSymbol, string> = {
@@ -55,6 +77,8 @@ export const coinLogo: Record<CoinSymbol, string> = {
   ETH: "/brand/net-ethereum.svg",
   SOL: "/brand/net-solana.svg",
   POL: "/brand/net-polygon.svg",
+  BNB: "/brand/net-bnb.svg",
+  AVAX: "/brand/net-avalanche.svg",
 };
 
 export function networkLabel(key: string | null | undefined) {

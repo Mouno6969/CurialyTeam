@@ -29,12 +29,19 @@ export const NETWORKS = {
   ethereum: { label: "Ethereum", coins: ["USDC", "USDT", "ETH"] },
   solana: { label: "Solana", coins: ["USDC", "USDT", "SOL"] },
   polygon: { label: "Polygon", coins: ["USDC", "USDT", "POL"] },
+  bnb: { label: "BNB Chain", coins: ["USDC", "USDT", "BNB"] },
+  avalanche: { label: "Avalanche C-Chain", coins: ["USDC", "USDT", "AVAX"] },
+  base: { label: "Base", coins: ["USDC", "USDT", "ETH"] },
 };
 
-// The operator's receiving addresses. EVM chains share one; Solana has its own.
+// Receiving wallets. Ethereum, Base, and BNB share one; Polygon and Avalanche
+// C-Chain keep the previous EVM wallet; Solana has its own.
 export const SETTLEMENT_ADDRESSES = {
-  ethereum: "0xb94a707D215Eb8d480E7acC15c831ACC57BA1e25",
+  ethereum: "0x7cea9Cd09032AA60755972c424b49395A06a4763",
+  base: "0x7cea9Cd09032AA60755972c424b49395A06a4763",
+  bnb: "0x7cea9Cd09032AA60755972c424b49395A06a4763",
   polygon: "0xb94a707D215Eb8d480E7acC15c831ACC57BA1e25",
+  avalanche: "0xb94a707D215Eb8d480E7acC15c831ACC57BA1e25",
   solana: "7rtkQHXXG75p5EKhDN6UsCa7H2azqvVJmq3sCY85HSzz",
 };
 
@@ -44,7 +51,7 @@ export const STABLECOINS = new Set(["USDC", "USDT"]);
 // market: a native-coin order quotes whatever is here at submission time and
 // the quote is frozen onto the order so the receipt stays consistent. Update
 // these before relying on native-coin payments.
-export const NATIVE_USD_PRICE = { ETH: 3200, SOL: 140, POL: 0.45 };
+export const NATIVE_USD_PRICE = { ETH: 3200, SOL: 140, POL: 0.45, BNB: 600, AVAX: 35 };
 
 /**
  * Resolves client-sent line items into priced items and a total.
@@ -97,7 +104,7 @@ export function expectedAmount(coin, totalUsd) {
   if (STABLECOINS.has(coin)) return totalUsd.toFixed(2);
   const price = NATIVE_USD_PRICE[coin];
   if (!price) throw badRequest(`No reference price for ${coin}.`);
-  const decimals = coin === "ETH" ? 6 : coin === "SOL" ? 4 : 2;
+  const decimals = coin === "ETH" || coin === "BNB" ? 6 : coin === "SOL" || coin === "AVAX" ? 4 : 2;
   return (totalUsd / price).toFixed(decimals);
 }
 

@@ -279,7 +279,7 @@ function PaymentPage() {
                         <p className="mt-2 text-sm leading-6 text-muted-foreground">
                           Pick the blockchain you will send from. You choose the coin next.
                         </p>
-                        <div className="mt-4 grid gap-3">
+                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
                           {networks.map((item) => (
                             <button
                               key={item.key}

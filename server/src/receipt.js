@@ -48,7 +48,14 @@ const STATUS_FILL = {
   expired: { fill: "#5a5752", text: "#fbf8f1" },
 };
 
-const NETWORK_LABELS = { ethereum: "Ethereum", solana: "Solana", polygon: "Polygon" };
+const NETWORK_LABELS = {
+  ethereum: "Ethereum",
+  solana: "Solana",
+  polygon: "Polygon",
+  bnb: "BNB Chain",
+  avalanche: "Avalanche C-Chain",
+  base: "Base",
+};
 
 // A4 at 144 dpi.
 const PAGE_W = 1191;

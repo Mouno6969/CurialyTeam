@@ -96,6 +96,7 @@ export async function selectPaymentMethod(order, network, coin) {
 
   const amount = expectedAmount(coin, Number(order.total_usd));
   const address = SETTLEMENT_ADDRESSES[network];
+  if (!address) throw badRequest("No settlement address for this network.");
 
   await query(
     `UPDATE orders
