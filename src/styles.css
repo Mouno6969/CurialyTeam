@@ -183,6 +183,16 @@ html[data-theme="light"] {
     line-height: 1.18;
   }
 
+  .lang-switch-btn {
+    touch-action: manipulation;
+  }
+
+  .lang-switch-btn[aria-pressed="true"],
+  .lang-switch-btn.is-active {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+
   .display {
     font-family: var(--font-display);
     font-weight: 400;

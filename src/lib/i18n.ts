@@ -17,8 +17,17 @@ function detectLocale(): Locale {
 
 function readStored(): Locale | null {
   if (typeof localStorage === "undefined") return null;
-  const value = localStorage.getItem(STORAGE_KEY);
-  return value === "zh" || value === "en" ? value : null;
+  try {
+    const value = localStorage.getItem(STORAGE_KEY);
+    return value === "zh" || value === "en" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function readClientLocale(): Locale {
+  if (typeof window === "undefined") return "en";
+  return readStored() ?? detectLocale();
 }
 
 function applyLocale(locale: Locale) {
@@ -26,6 +35,15 @@ function applyLocale(locale: Locale) {
   const root = document.documentElement;
   root.lang = locale === "zh" ? "zh-CN" : "en";
   root.dataset.locale = locale;
+}
+
+function persist(locale: Locale) {
+  try {
+    localStorage.setItem(STORAGE_KEY, locale);
+    document.cookie = `curialy_locale=${locale};path=/;max-age=31536000;samesite=lax`;
+  } catch {
+    /* private mode */
+  }
 }
 
 function interpolate(template: string, vars?: Record<string, string | number>) {
@@ -43,25 +61,31 @@ type I18nState = {
 };
 
 export const useI18n = create<I18nState>()((set, get) => ({
-  locale: "en",
-  ready: false,
+  locale: readClientLocale(),
+  ready: typeof window !== "undefined",
   hydrate: () => {
-    if (get().ready) return;
     const locale = readStored() ?? detectLocale();
     applyLocale(locale);
-    set({ locale, ready: true });
+    persist(locale);
+    if (get().locale !== locale || !get().ready) set({ locale, ready: true });
   },
   setLocale: (locale) => {
-    if (get().locale === locale) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, locale);
-    } catch {
-      /* private mode */
+    if (get().locale === locale) {
+      applyLocale(locale);
+      persist(locale);
+      return;
     }
+    persist(locale);
     applyLocale(locale);
     set({ locale, ready: true });
   },
 }));
+
+if (typeof window !== "undefined") {
+  window.__CURIALY_SET_LOCALE = (locale: Locale) => {
+    useI18n.getState().setLocale(locale);
+  };
+}
 
 export function t(
   locale: Locale,
@@ -83,4 +107,12 @@ export function useT() {
 export function planLabel(locale: Locale, planId: string) {
   const key = `plan.${planId}` as MessageKey;
   return dictionaries[locale][key] ?? dictionaries.en[key] ?? planId;
+}
+
+declare global {
+  interface Window {
+    __CURIALY_SET_LOCALE?: (locale: Locale) => void;
+    __curialyApplyLocale?: (locale: Locale) => void;
+    __CURIALY_I18N?: Record<string, Record<string, string>>;
+  }
 }
