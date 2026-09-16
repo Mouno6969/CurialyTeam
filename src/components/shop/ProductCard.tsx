@@ -6,14 +6,20 @@ import { BrokenRing } from "@/components/brand/DotField";
 import { ProductMark } from "@/components/brand/ProductMark";
 import { useBag } from "@/lib/bag-store";
 import { formatMoney } from "@/lib/format";
+import { planLabel, useI18n, useT } from "@/lib/i18n";
 import type { CatalogProduct } from "@/lib/storefront";
 import { cn } from "@/lib/utils";
 
 export function ProductCard({ product }: { product: CatalogProduct }) {
   const add = useBag((s) => s.add);
+  const t = useT();
+  const locale = useI18n((s) => s.locale);
   const [selectedPlanId, setSelectedPlanId] = useState(product.plans[0]?.id ?? "");
   const selectedPlan =
     product.plans.find((plan) => plan.id === selectedPlanId) ?? product.plans[0];
+  const categoryKey = product.id === "google-ai" ? "product.ai.category" : "product.x.category";
+  const descriptionKey =
+    product.id === "google-ai" ? "product.ai.description" : "product.x.description";
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-border)] transition-[transform,box-shadow] duration-200 ease-[var(--ease-smooth-out)] hover:-translate-y-1 hover:shadow-[var(--shadow-border-hover)]">
@@ -21,25 +27,25 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
         <div className="dot-field absolute inset-0 opacity-80" />
         <div className="absolute inset-4 rounded-lg hairline-ring" />
         <BrokenRing className="absolute size-44 opacity-35 sm:size-52" />
-        <Badge className="absolute left-4 top-4 z-10">{product.category}</Badge>
+        <Badge className="absolute left-4 top-4 z-10">{t(categoryKey)}</Badge>
         {!product.available ? (
           <Badge className="absolute right-4 top-4 z-10" variant="quiet">
-            Unavailable
+            {t("product.unavailable")}
           </Badge>
         ) : null}
-        <ProductMark
-          kind={product.mark}
-          className="relative z-10 h-20 w-20"
-        />
+        <ProductMark kind={product.mark} className="relative z-10 h-20 w-20" />
       </div>
       <div className="flex flex-1 flex-col p-5 sm:p-6">
         <h3 className="font-display text-2xl tracking-[-0.03em] text-foreground">
           {product.name}
         </h3>
         <p className="mt-3 min-h-12 text-sm leading-6 text-muted-foreground">
-          {product.description}
+          {t(descriptionKey)}
         </p>
-        <div className="mt-5 flex flex-wrap gap-2" aria-label={`Choose ${product.name} duration`}>
+        <div
+          className="mt-5 flex flex-wrap gap-2"
+          aria-label={t("product.choose", { name: product.name })}
+        >
           {product.plans.map((plan) => {
             const selected = selectedPlan?.id === plan.id;
             return (
@@ -56,14 +62,14 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
                   "disabled:cursor-not-allowed disabled:opacity-45",
                 )}
               >
-                {plan.label}
+                {planLabel(locale, plan.id)}
               </button>
             );
           })}
         </div>
         <div className="mt-6 flex items-end justify-between gap-4 border-t border-border pt-4">
           <div>
-            <p className="kicker">Plan price</p>
+            <p className="kicker">{t("product.price")}</p>
             <div className="mt-1 flex items-baseline gap-2">
               <p className="tabular text-xl font-semibold tracking-tight">
                 {selectedPlan ? formatMoney(selectedPlan.price) : "—"}
@@ -83,10 +89,10 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
             {product.available ? (
               <>
                 <Plus className="size-4" />
-                Add to bag
+                {t("product.add")}
               </>
             ) : (
-              "Currently unavailable"
+              t("product.unavailableCta")
             )}
           </Button>
         </div>

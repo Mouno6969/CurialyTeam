@@ -1,49 +1,30 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ClipboardCheck, ReceiptText, Send, ShoppingBag } from "lucide-react";
+import { Check, ClipboardCheck, Send, ShoppingBag } from "lucide-react";
 import { SiteChrome } from "@/components/layout/SiteChrome";
 import { PageHero } from "@/components/layout/PageHero";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/how-it-works")({ component: HowItWorks });
 
-const steps = [
-  {
-    number: "01",
-    title: "Choose a plan",
-    copy: "Review the plan options, current availability, and displayed pricing before making a selection.",
-    icon: ShoppingBag,
-  },
-  {
-    number: "02",
-    title: "Build your bag",
-    copy: "Add an available plan, adjust the quantity if needed, and review the estimated total in your bag.",
-    icon: ClipboardCheck,
-  },
-  {
-    number: "03",
-    title: "Pay and submit",
-    copy: "Confirm delivery details, pick a network and coin, then send the exact amount shown to the address shown and paste the transaction hash back.",
-    icon: Send,
-  },
-  {
-    number: "04",
-    title: "Keep your receipt",
-    copy: "A receipt is issued straight away, carrying your order code as both a barcode and a QR code. Use that code to follow the order through to completion.",
-    icon: ReceiptText,
-  },
-];
-
 function HowItWorks() {
+  const t = useT();
+  const steps = [
+    { number: "01", title: t("how.s1.title"), copy: t("how.s1.copy"), icon: ShoppingBag },
+    { number: "02", title: t("how.s2.title"), copy: t("how.s2.copy"), icon: ClipboardCheck },
+    { number: "03", title: t("how.s3.title"), copy: t("how.s3.copy"), icon: Send },
+  ];
+
   return (
     <SiteChrome>
       <PageHero
-        kicker="Process overview"
-        title="A simple path from"
-        emphasis="selection to request."
-        copy="Curialy keeps the order-preparation process concise. Every step is visible before you continue to payment."
+        kicker={t("how.kicker")}
+        title={t("how.title")}
+        emphasis={t("how.emphasis")}
+        copy={t("how.copy")}
       />
       <section className="page-wrap pb-16 sm:pb-20">
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 md:grid-cols-3">
           {steps.map((step) => {
             const Icon = step.icon;
             return (
@@ -65,18 +46,15 @@ function HowItWorks() {
           <div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Check className="size-4" />
-              <p className="kicker">Before you proceed</p>
+              <p className="kicker">{t("how.beforeKicker")}</p>
             </div>
-            <h2 className="font-display mt-4 text-3xl tracking-[-0.04em]">
-              Review availability and terms first.
-            </h2>
+            <h2 className="font-display mt-4 text-3xl tracking-[-0.04em]">{t("how.beforeTitle")}</h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-              A plan marked unavailable cannot be added to the bag. Confirm plan duration and
-              eligibility before sending an order request.
+              {t("how.beforeCopy")}
             </p>
           </div>
           <Button asChild>
-            <Link to="/documentation">Read documentation</Link>
+            <Link to="/documentation">{t("how.docs")}</Link>
           </Button>
         </div>
       </section>

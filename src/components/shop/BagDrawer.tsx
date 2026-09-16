@@ -1,4 +1,4 @@
-import { type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Minus, Plus, ShieldCheck, ShoppingBag, X } from "lucide-react";
 import { ProductMark } from "@/components/brand/ProductMark";
@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useBag } from "@/lib/bag-store";
 import { formatMoney } from "@/lib/format";
+import { planLabel, useI18n, useT } from "@/lib/i18n";
 import { ApiError, createOrder } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 
 export function BagDrawer() {
   const navigate = useNavigate();
+  const t = useT();
+  const locale = useI18n((s) => s.locale);
   const {
     bag,
     isOpen,
@@ -55,9 +57,7 @@ export function BagDrawer() {
       clear();
       void navigate({ to: "/pay/$id", params: { id: order.orderCode } });
     } catch (cause) {
-      setError(
-        cause instanceof ApiError ? cause.message : "Could not create your order. Try again.",
-      );
+      setError(cause instanceof ApiError ? cause.message : t("bag.payError"));
       setPending(false);
     }
   }
@@ -66,7 +66,7 @@ export function BagDrawer() {
     event.preventDefault();
     const next = xHandle.trim();
     if (!/^[A-Za-z0-9_]{1,15}$/.test(next)) {
-      setError("Use 1–15 letters, numbers, or underscores.");
+      setError(t("bag.handleError"));
       return;
     }
     void finish(next);
@@ -82,7 +82,7 @@ export function BagDrawer() {
     >
       <button
         type="button"
-        aria-label="Close shopping bag"
+        aria-label={t("bag.closeOverlay")}
         onClick={close}
         className={cn(
           "absolute inset-0 bg-background/55 backdrop-blur-[2px] transition-opacity duration-200 ease-[var(--ease-smooth-out)]",
@@ -97,12 +97,12 @@ export function BagDrawer() {
       >
         <div className="flex items-center justify-between border-b border-border px-6 py-5">
           <div>
-            <p className="kicker">Your selection</p>
+            <p className="kicker">{t("bag.kicker")}</p>
             <h2 className="font-display mt-1 text-2xl tracking-[-0.03em]">
-              Shopping bag ({itemCount})
+              {t("bag.title", { n: itemCount })}
             </h2>
           </div>
-          <Button variant="ghost" size="icon" onClick={close} aria-label="Close bag">
+          <Button variant="ghost" size="icon" onClick={close} aria-label={t("bag.close")}>
             <X className="size-5" />
           </Button>
         </div>
@@ -113,16 +113,15 @@ export function BagDrawer() {
               onSubmit={submitHandle}
               className="rounded-xl bg-secondary p-5 shadow-[var(--shadow-border)]"
             >
-              <p className="kicker">One last detail</p>
+              <p className="kicker">{t("bag.handleKicker")}</p>
               <h3 className="font-display mt-2 text-3xl tracking-[-0.03em]">
-                Where should we deliver X Premium?
+                {t("bag.handleTitle")}
               </h3>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                Enter the exact X handle that should receive this purchase. Never enter a
-                password, recovery code, or wallet secret.
+                {t("bag.handleCopy")}
               </p>
               <label className="mt-6 block text-sm font-medium" htmlFor="x-handle">
-                X handle
+                {t("bag.handleLabel")}
               </label>
               <div className="mt-2 flex items-center rounded-md bg-card shadow-[var(--shadow-border)] focus-within:ring-2 focus-within:ring-ring/70">
                 <span className="px-3 text-sm font-medium text-muted-foreground">@</span>
@@ -139,9 +138,7 @@ export function BagDrawer() {
                   className="border-0 bg-transparent shadow-none focus-visible:ring-0"
                 />
               </div>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                Use 1–15 letters, numbers, or underscores.
-              </p>
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("bag.handleHint")}</p>
               {error ? (
                 <p className="mt-4 rounded-md bg-destructive/15 px-3 py-2 text-xs leading-5 text-destructive">
                   {error}
@@ -149,11 +146,11 @@ export function BagDrawer() {
               ) : null}
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <Button type="button" variant="outline" onClick={backToBag} disabled={pending}>
-                  Back to bag
+                  {t("bag.back")}
                 </Button>
                 <Button type="submit" disabled={!xHandle.trim() || pending}>
                   <ShieldCheck className="size-4" />
-                  {pending ? "Opening payment…" : "Continue to payment"}
+                  {pending ? t("bag.opening") : t("bag.continue")}
                 </Button>
               </div>
             </form>
@@ -165,16 +162,15 @@ export function BagDrawer() {
                   className="flex gap-4 border-b border-border pb-5"
                 >
                   <div className="flex size-16 shrink-0 items-center justify-center rounded-md bg-secondary shadow-[var(--shadow-border)]">
-                    <ProductMark
-                      kind={item.product.mark}
-                      className="h-8 w-8"
-                    />
+                    <ProductMark kind={item.product.mark} className="h-8 w-8" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex justify-between gap-3">
                       <div>
                         <p className="font-medium">{item.product.name}</p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">{item.plan.label}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {planLabel(locale, item.plan.id)}
+                        </p>
                       </div>
                       <p className="tabular text-sm font-semibold">
                         {formatMoney(item.plan.price * item.quantity)}
@@ -184,7 +180,7 @@ export function BagDrawer() {
                       <div className="flex items-center rounded-md shadow-[var(--shadow-border)]">
                         <button
                           type="button"
-                          aria-label="Decrease quantity"
+                          aria-label={t("bag.decrease")}
                           onClick={() =>
                             updateQuantity(item.product.id, item.plan.id, item.quantity - 1)
                           }
@@ -197,7 +193,7 @@ export function BagDrawer() {
                         </span>
                         <button
                           type="button"
-                          aria-label="Increase quantity"
+                          aria-label={t("bag.increase")}
                           onClick={() =>
                             updateQuantity(item.product.id, item.plan.id, item.quantity + 1)
                           }
@@ -211,7 +207,7 @@ export function BagDrawer() {
                         onClick={() => remove(item.product.id, item.plan.id)}
                         className="text-xs font-medium text-muted-foreground underline-offset-4 hover:underline"
                       >
-                        Remove
+                        {t("bag.remove")}
                       </button>
                     </div>
                   </div>
@@ -221,9 +217,9 @@ export function BagDrawer() {
           ) : (
             <div className="flex h-full flex-col items-center justify-center text-center">
               <ShoppingBag className="size-7 text-muted-foreground" />
-              <h3 className="font-display mt-4 text-2xl">Your bag is open.</h3>
+              <h3 className="font-display mt-4 text-2xl">{t("bag.emptyTitle")}</h3>
               <p className="mt-2 max-w-xs text-sm leading-6 text-muted-foreground">
-                Choose a plan and it will appear here, ready to become an order.
+                {t("bag.emptyCopy")}
               </p>
             </div>
           )}
@@ -232,7 +228,7 @@ export function BagDrawer() {
         {!isXHandleStep ? (
           <div className="border-t border-border bg-secondary p-6">
             <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>Estimated total</span>
+              <span>{t("bag.total")}</span>
               <span className="tabular font-semibold text-foreground">
                 {bag.length ? formatMoney(total()) : "—"}
               </span>
@@ -244,7 +240,7 @@ export function BagDrawer() {
               disabled={!bag.length || pending}
             >
               <ShieldCheck className="size-4" />
-              {pending ? "Creating your order…" : "Continue to payment"}
+              {pending ? t("bag.creating") : t("bag.continue")}
             </Button>
             {error ? (
               <p className="mt-3 rounded-md bg-destructive/15 px-3 py-2 text-center text-xs leading-5 text-destructive">
@@ -252,8 +248,7 @@ export function BagDrawer() {
               </p>
             ) : (
               <p className="mt-3 text-center text-[11px] leading-5 text-muted-foreground">
-                You will choose a network and either transfer manually or pay from a connected
-                wallet on the next page.
+                {t("bag.hint")}
               </p>
             )}
           </div>

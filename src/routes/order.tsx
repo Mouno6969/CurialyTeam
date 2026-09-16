@@ -8,10 +8,10 @@ import { ReceiptPanel } from "@/components/order/ReceiptPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ApiError, fetchOrder, type Order } from "@/lib/api";
+import { useT } from "@/lib/i18n";
+import { TELEGRAM_HANDLE, TELEGRAM_URL } from "@/lib/support";
 
 export const Route = createFileRoute("/order")({
-  // The receipt QR points here with ?code=…, so the lookup can run on load.
-  // Annotated optional so plain <Link to="/order"> does not demand a code.
   validateSearch: (search: Record<string, unknown>): { code?: string } => ({
     code: typeof search.code === "string" ? search.code : undefined,
   }),
@@ -19,32 +19,36 @@ export const Route = createFileRoute("/order")({
 });
 
 function OrderStatusPage() {
+  const t = useT();
   const { code: codeFromLink } = Route.useSearch();
   const [input, setInput] = useState(codeFromLink ?? "");
   const [order, setOrder] = useState<Order | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const lookup = useCallback(async (raw: string) => {
-    const code = raw.trim();
-    if (!code) return;
-    setBusy(true);
-    setError(null);
-    try {
-      setOrder(await fetchOrder(code));
-    } catch (cause) {
-      setOrder(null);
-      setError(
-        cause instanceof ApiError && cause.status === 404
-          ? "No order matches that code. Check it against your receipt."
-          : cause instanceof ApiError
-            ? cause.message
-            : "Could not reach the order service.",
-      );
-    } finally {
-      setBusy(false);
-    }
-  }, []);
+  const lookup = useCallback(
+    async (raw: string) => {
+      const code = raw.trim();
+      if (!code) return;
+      setBusy(true);
+      setError(null);
+      try {
+        setOrder(await fetchOrder(code));
+      } catch (cause) {
+        setOrder(null);
+        setError(
+          cause instanceof ApiError && cause.status === 404
+            ? t("order.notFound")
+            : cause instanceof ApiError
+              ? cause.message
+              : t("order.unreachable"),
+        );
+      } finally {
+        setBusy(false);
+      }
+    },
+    [t],
+  );
 
   useEffect(() => {
     if (codeFromLink) void lookup(codeFromLink);
@@ -58,15 +62,15 @@ function OrderStatusPage() {
   return (
     <SiteChrome>
       <PageHero
-        kicker="Order status"
-        title="Check an order"
-        emphasis="with its code."
-        copy="Type the code printed on your receipt — the one under the barcode, like CLY-7K3M2QX9. Case and the CLY- prefix do not matter."
+        kicker={t("order.kicker")}
+        title={t("order.title")}
+        emphasis={t("order.emphasis")}
+        copy={t("order.copy")}
       />
       <section className="page-wrap pb-16 sm:pb-20">
         <form onSubmit={onSubmit} className="max-w-xl">
           <label className="text-xs font-semibold" htmlFor="order-code">
-            Order code
+            {t("order.label")}
           </label>
           <div className="mt-2 flex gap-2">
             <Input
@@ -80,7 +84,7 @@ function OrderStatusPage() {
             />
             <Button type="submit" disabled={!input.trim() || busy}>
               <Search className="mr-2 size-4" />
-              {busy ? "Checking…" : "Check"}
+              {busy ? t("order.busy") : t("order.search")}
             </Button>
           </div>
         </form>
@@ -90,11 +94,10 @@ function OrderStatusPage() {
             <TriangleAlert className="size-6 text-destructive" />
             <p className="mt-3 text-sm leading-6">{error}</p>
             <p className="mt-3 text-xs leading-5 text-muted-foreground">
-              Still stuck? Message{" "}
-              <a className="underline underline-offset-4" href="https://t.me/Curialy">
-                @Curialy
-              </a>{" "}
-              on Telegram with the code and we will find it.
+              {t("support.send")}{" "}
+              <a className="underline underline-offset-4" href={TELEGRAM_URL}>
+                @{TELEGRAM_HANDLE}
+              </a>
             </p>
           </div>
         ) : null}
@@ -107,7 +110,7 @@ function OrderStatusPage() {
               {order.status === "awaiting_payment" ? (
                 <Button asChild className="mt-5">
                   <Link to="/pay/$id" params={{ id: order.orderCode }}>
-                    Continue payment
+                    {t("bag.continue")}
                   </Link>
                 </Button>
               ) : null}

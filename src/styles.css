@@ -24,8 +24,8 @@
   --color-paper: #f6f3ec;
   --color-ink: #16161a;
 
-  --font-sans: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
-  --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Instrument Sans", "Noto Sans SC", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Instrument Serif", "Noto Serif SC", "Iowan Old Style", Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
 
   --radius-xs: 4px;
@@ -168,6 +168,19 @@ html[data-theme="light"] {
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--color-muted-foreground);
+  }
+
+  html[data-locale="zh"] .kicker {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
+  }
+
+  html[data-locale="zh"] .display,
+  html[data-locale="zh"] .display-xl {
+    letter-spacing: 0;
+    line-height: 1.18;
   }
 
   .display {

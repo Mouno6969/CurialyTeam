@@ -3,51 +3,33 @@ import { Send } from "lucide-react";
 import { SiteChrome } from "@/components/layout/SiteChrome";
 import { PageHero } from "@/components/layout/PageHero";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 import { TELEGRAM_HANDLE, TELEGRAM_URL } from "@/lib/support";
 
 export const Route = createFileRoute("/refund-policy")({ component: RefundPolicy });
 
-const sections = [
-  {
-    id: "01",
-    title: "The promise",
-    copy: "If a paid order fails to reach you, we refund it. That is the whole point of this page. We will not keep money for a plan that never arrived at the account you named.",
-  },
-  {
-    id: "02",
-    title: "When a refund is due",
-    copy: "A refund is due when payment has been received and fulfillment cannot be completed — the plan does not appear on the agreed account, delivery cannot be finished after a genuine attempt, or we confirm that the order was paid and then lost on our side.",
-  },
-  {
-    id: "03",
-    title: "How to ask",
-    copy: `Message @${TELEGRAM_HANDLE} on Telegram with the order code from your receipt, the plan, and the delivery detail you gave at checkout (for example the X handle). We confirm the miss, then return the same amount on the same network and coin.`,
-  },
-  {
-    id: "04",
-    title: "How quickly",
-    copy: "As soon as we can verify that the order did not arrive. In ordinary cases that is a few days from your message. We will not stall a confirmed miss behind a ticket maze.",
-  },
-  {
-    id: "05",
-    title: "What this is not",
-    copy: "A change of mind after the plan is working on your account is not a refund. A later dispute with the third-party service, after access has been delivered as described, is also outside this policy.",
-  },
-];
-
 function RefundPolicy() {
+  const t = useT();
+  const sections = [
+    { id: "01", title: t("refund.s1.title"), copy: t("refund.s1.copy") },
+    { id: "02", title: t("refund.s2.title"), copy: t("refund.s2.copy") },
+    { id: "03", title: t("refund.s3.title"), copy: t("refund.s3.copy", { handle: TELEGRAM_HANDLE }) },
+    { id: "04", title: t("refund.s4.title"), copy: t("refund.s4.copy") },
+    { id: "05", title: t("refund.s5.title"), copy: t("refund.s5.copy") },
+  ];
+
   return (
     <SiteChrome>
       <PageHero
-        kicker="Refund policy"
-        title="If it never arrives,"
-        emphasis="the money comes back."
-        copy="Write this down as our rule, not as small print: a paid order that fails to reach you is refunded. No theatre. No endless chain of tickets."
+        kicker={t("refund.kicker")}
+        title={t("refund.title")}
+        emphasis={t("refund.emphasis")}
+        copy={t("refund.copy")}
       />
       <section className="page-wrap pb-16 sm:pb-20">
         <div className="grid gap-5 lg:grid-cols-[0.34fr_0.66fr]">
           <aside className="h-fit rounded-xl bg-card p-6 shadow-[var(--shadow-border)]">
-            <p className="kicker">Contents</p>
+            <p className="kicker">{t("refund.contents")}</p>
             <ol className="mt-4 space-y-1 text-sm text-muted-foreground">
               {sections.map((item) => (
                 <li key={item.id}>
@@ -64,7 +46,7 @@ function RefundPolicy() {
             <Button asChild className="mt-6 w-full">
               <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer">
                 <Send className="size-4" />
-                Ask @{TELEGRAM_HANDLE}
+                {t("refund.ask", { handle: TELEGRAM_HANDLE })}
               </a>
             </Button>
           </aside>
@@ -86,20 +68,19 @@ function RefundPolicy() {
         </div>
         <div className="mt-8 flex flex-col justify-between gap-5 rounded-xl bg-card p-6 shadow-[var(--shadow-border)] sm:flex-row sm:items-center sm:p-8">
           <div>
-            <h2 className="font-display text-3xl tracking-[-0.04em]">Still waiting on an order?</h2>
+            <h2 className="font-display text-3xl tracking-[-0.04em]">{t("refund.waitTitle")}</h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-              Bring the order code from your receipt to Telegram. If it failed to reach you, the
-              refund is due.
+              {t("refund.waitCopy")}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Button asChild>
               <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer">
-                Message support
+                {t("refund.message")}
               </a>
             </Button>
             <Button asChild variant="outline">
-              <Link to="/support">Support desk</Link>
+              <Link to="/support">{t("refund.desk")}</Link>
             </Button>
           </div>
         </div>
