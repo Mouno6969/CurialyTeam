@@ -72,12 +72,12 @@ export const en = {
   "bag.kicker": "Your selection",
   "bag.title": "Shopping bag ({n})",
   "bag.emptyTitle": "Your bag is open.",
-  "bag.emptyCopy": "Choose a plan and it will appear here, ready to create a secure payment link.",
+  "bag.emptyCopy": "Choose a plan and it will appear here, ready to become an order.",
   "bag.total": "Estimated total",
   "bag.continue": "Continue to payment",
-  "bag.creating": "Creating secure payment link…",
+  "bag.creating": "Creating your order…",
   "bag.hint":
-    "You will choose a network and either transfer manually or pay from a connected wallet on the next page.",
+    "You will choose a network and coin on the next page, then send the exact amount shown to the address shown.",
   "bag.remove": "Remove",
   "bag.decrease": "Decrease quantity",
   "bag.increase": "Increase quantity",
@@ -90,7 +90,7 @@ export const en = {
   "bag.handleError": "Use 1–15 letters, numbers, or underscores.",
   "bag.back": "Back to bag",
   "bag.opening": "Opening payment…",
-  "bag.payError": "Could not open a payment link. Try again.",
+  "bag.payError": "Could not create your order. Try again.",
 
   "footer.legal":
     "© {year} Curialy. Names may be used only to identify compatible plan categories. This independent store is not affiliated with third-party providers.",
@@ -100,16 +100,19 @@ export const en = {
   "how.title": "A simple path from",
   "how.emphasis": "selection to request.",
   "how.copy":
-    "Curialy keeps the order-preparation process concise. Every step is visible before you continue to payment.",
+    "Curialy keeps the process concise: every step from selection to receipt stays visible before you commit.",
   "how.s1.title": "Choose a plan",
   "how.s1.copy":
     "Review the plan options, current availability, and displayed pricing before making a selection.",
   "how.s2.title": "Build your bag",
   "how.s2.copy":
     "Add an available plan, adjust the quantity if needed, and review the estimated total in your bag.",
-  "how.s3.title": "Prepare your request",
+  "how.s3.title": "Pay and submit",
   "how.s3.copy":
-    "Confirm delivery details, then continue to a secure payment link priced on the server.",
+    "Confirm delivery details, pick a network and coin, then send the exact amount shown to the address shown and paste the transaction hash back.",
+  "how.s4.title": "Keep your receipt",
+  "how.s4.copy":
+    "A receipt is issued straight away, carrying your order code as both a barcode and a QR code. Use that code to follow the order through to completion.",
   "how.beforeKicker": "Before you proceed",
   "how.beforeTitle": "Review availability and terms first.",
   "how.beforeCopy":
@@ -120,19 +123,19 @@ export const en = {
   "support.title": "Write to us,",
   "support.emphasis": "we read it ourselves.",
   "support.copy":
-    "Orders, payment links, and delivery questions go to a human desk on Telegram. Include your payment-link reference if the matter is about a specific order.",
+    "Orders, payments, and delivery questions go to a human desk on Telegram. Quote the order code from your receipt if the matter is about a specific order.",
   "support.desk": "The desk",
   "support.message": "Message @{handle}",
   "support.deskCopy":
-    "This is a personal Telegram account, not a screenshot bot. Ask about availability, a payment session, or a delivery that has not arrived. A person on the Curialy side opens every message.",
+    "This is a personal Telegram account, not a screenshot bot. Ask about availability, an order in progress, or a delivery that has not arrived. A person on the Curialy side opens every message.",
   "support.reply":
     "Typical reply within a day. Longer only when we are confirming a transfer or a fulfillment step.",
   "support.send":
-    "Send the payment-link id, the plan, and the delivery handle if the question is about an order.",
+    "Send the order code from your receipt, the plan, and the delivery handle if the question is about an order.",
   "support.open": "Open Telegram · @{handle}",
   "support.card": "Calling card",
   "support.handle": "What we handle",
-  "support.handleCopy": "Order status, missing delivery, payment-link questions, refunds.",
+  "support.handleCopy": "Order status, missing delivery, payment questions, refunds.",
   "support.never": "What we never ask",
   "support.neverCopy":
     "Passwords, recovery phrases, wallet seeds, or screenshots of secret keys.",
@@ -141,7 +144,7 @@ export const en = {
     "Current availability is shown directly on each plan card. Unavailable plans cannot be placed in the bag.",
   "support.t2.title": "Order requests",
   "support.t2.copy":
-    "Use the bag to prepare a concise request. The site provides a payment link, not a payment confirmation.",
+    "Use the bag to prepare a concise request. Submitting a transaction hash records an order and issues a receipt; it is not itself a payment confirmation.",
   "support.t3.title": "Eligibility and terms",
   "support.t3.copy":
     "Review duration, regional eligibility, and provider terms before sending a request through your chosen channel.",
@@ -153,7 +156,7 @@ export const en = {
   "support.docsKicker": "Need the store guide?",
   "support.docsTitle": "Start with documentation.",
   "support.docsCopy":
-    "Availability rules, bag behavior, and the payment-link flow sit together in one reference.",
+    "Availability rules, bag behavior, receipts, and how to check an order sit together in one reference.",
   "support.docsCta": "Open documentation",
 
   "refund.kicker": "Refund policy",
@@ -171,7 +174,7 @@ export const en = {
     "A refund is due when payment has been received and fulfillment cannot be completed — the plan does not appear on the agreed account, delivery cannot be finished after a genuine attempt, or we confirm that the order was paid and then lost on our side.",
   "refund.s3.title": "How to ask",
   "refund.s3.copy":
-    "Message @{handle} on Telegram with the payment-link reference, the plan, and the delivery detail you gave at checkout (for example the X handle). We confirm the miss, then return the same amount on the same network and coin.",
+    "Message @{handle} on Telegram with the order code from your receipt, the plan, and the delivery detail you gave at checkout (for example the X handle). We confirm the miss, then return the same amount on the same network and coin.",
   "refund.s4.title": "How quickly",
   "refund.s4.copy":
     "As soon as we can verify that the order did not arrive. In ordinary cases that is a few days from your message. We will not stall a confirmed miss behind a ticket maze.",
@@ -180,7 +183,7 @@ export const en = {
     "A change of mind after the plan is working on your account is not a refund. A later dispute with the third-party service, after access has been delivered as described, is also outside this policy.",
   "refund.waitTitle": "Still waiting on an order?",
   "refund.waitCopy":
-    "Bring the payment-link reference to Telegram. If it failed to reach you, the refund is due.",
+    "Bring the order code from your receipt to Telegram. If it failed to reach you, the refund is due.",
   "refund.message": "Message support",
   "refund.desk": "Support desk",
 
@@ -188,7 +191,7 @@ export const en = {
   "docs.title": "The essentials,",
   "docs.emphasis": "in one place.",
   "docs.copy":
-    "Use this reference to understand availability, plan selection, and the request-preparation flow before you use the store.",
+    "Use this reference to understand availability, plan selection, how an order is paid for, and how to check its status afterwards using the code on your receipt.",
   "docs.contents": "Contents",
   "docs.s1.title": "Selecting plans",
   "docs.s1.copy":
@@ -199,17 +202,29 @@ export const en = {
   "docs.s3.title": "Using the bag",
   "docs.s3.copy":
     "The bag supports quantity changes, removal, and an estimated total. It is designed to help prepare a request rather than collect payment.",
-  "docs.s4.title": "Opening a payment link",
+  "docs.s4.title": "Your order code",
   "docs.s4.copy":
-    "Continue from the bag to receive an opaque payment link. Choose a network and coin, then transfer manually or connect a wallet.",
-  "docs.s5.title": "Human support",
+    "Continuing from the bag creates an order and gives it a short code, such as CLY-7K3M2QX9. That code is how you find the order later, and how support finds it too. It appears on screen and on your receipt.",
+  "docs.s5.title": "Paying",
   "docs.s5.copy":
-    "Questions go to @Curialy on Telegram. A person reads the desk. Include the payment-link reference when the matter is about a specific order.",
-  "docs.s6.title": "Refunds",
+    "Choose the network you will send from, then the coin. The exact amount and the destination address are shown together; send that amount to that address from any wallet, then paste the transaction hash back. Manual transfer is the only method — there is no wallet connection.",
+  "docs.s6.title": "Stablecoins and native coins",
   "docs.s6.copy":
+    "USDC and USDT amounts are fixed in dollars. Native coins are converted at a reference rate locked onto your order when you choose the coin, so the figure you are shown is the figure that counts.",
+  "docs.s7.title": "Your receipt",
+  "docs.s7.copy":
+    "Submitting the transaction hash issues a receipt immediately, with the order code, the delivery handle, the items, the amount, the destination address, and the hash. It carries a barcode of the order code and a QR code that opens the order's status page. It is downloadable, and it reissues itself as the status changes.",
+  "docs.s8.title": "Checking an order",
+  "docs.s8.copy":
+    "Enter your code on the order status page at any time. Case and the CLY- prefix are optional. An order reads awaiting payment, then pending review once you submit a hash, then confirming while it is checked, then completed or rejected. Unpaid orders expire after thirty minutes.",
+  "docs.s9.title": "Human support",
+  "docs.s9.copy":
+    "Questions go to @Curialy on Telegram. A person reads the desk. Quote your order code when the matter is about a specific order.",
+  "docs.s10.title": "Refunds",
+  "docs.s10.copy":
     "If a paid order fails to reach the account you named, we refund it. The full wording lives on the refund policy page.",
   "docs.readyTitle": "Ready to browse plans?",
-  "docs.readyCopy": "Return to the storefront to see current status and available plan options.",
+  "docs.readyCopy": "Return to the storefront to see current status and available plan options, or check an existing order with its code.",
   "docs.visit": "Visit the store",
   "docs.refund": "Refund policy",
 
@@ -223,7 +238,7 @@ export const en = {
   "ref.s1.title": "1. You share your personal link",
   "ref.s1.copy": "Your unique link is ready below. Share it with people who are genuinely interested.",
   "ref.s2.title": "2. Your friend makes an order",
-  "ref.s2.copy": "They use the link, create a payment session, and choose a payment method.",
+  "ref.s2.copy": "They use the link, place an order, and pay on the network and coin they prefer.",
   "ref.s3.title": "3. The payment system verifies it",
   "ref.s3.copy":
     "Verification checks the real on-chain transfer, not only a screenshot or submitted hash.",

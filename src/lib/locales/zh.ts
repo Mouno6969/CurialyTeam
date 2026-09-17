@@ -71,11 +71,11 @@ export const zh: Record<MessageKey, string> = {
   "bag.kicker": "当前选择",
   "bag.title": "购物袋（{n}）",
   "bag.emptyTitle": "购物袋已打开。",
-  "bag.emptyCopy": "选择方案后会出现在这里，随后可生成安全付款链接。",
+  "bag.emptyCopy": "选择方案后会出现在这里，随后即可创建订单。",
   "bag.total": "预估合计",
   "bag.continue": "继续付款",
-  "bag.creating": "正在创建安全付款链接…",
-  "bag.hint": "下一页将选择网络，并手动转账或使用已连接的钱包支付。",
+  "bag.creating": "正在创建订单…",
+  "bag.hint": "下一页将选择网络与币种，然后按页面显示的金额转到显示的地址。",
   "bag.remove": "移除",
   "bag.decrease": "减少数量",
   "bag.increase": "增加数量",
@@ -88,7 +88,7 @@ export const zh: Record<MessageKey, string> = {
   "bag.handleError": "请使用 1–15 位字母、数字或下划线。",
   "bag.back": "返回购物袋",
   "bag.opening": "正在打开付款页…",
-  "bag.payError": "无法打开付款链接，请再试一次。",
+  "bag.payError": "无法创建订单，请再试一次。",
 
   "footer.legal":
     "© {year} Curialy。名称仅用于标识兼容的方案类别。本独立商店与第三方服务商无隶属关系。",
@@ -97,13 +97,17 @@ export const zh: Record<MessageKey, string> = {
   "how.kicker": "流程说明",
   "how.title": "从选择到下单，",
   "how.emphasis": "路径很短。",
-  "how.copy": "Curialy 把备单流程写得很短。进入付款前，每一步都看得见。",
+  "how.copy": "Curialy 把流程写得很短：从选择到收据，每一步都看得见。",
   "how.s1.title": "选择方案",
   "how.s1.copy": "先看方案选项、当前是否可售，以及页面上的价格，再做选择。",
   "how.s2.title": "放入购物袋",
   "how.s2.copy": "加入可售方案，按需调整数量，并核对购物袋中的预估合计。",
-  "how.s3.title": "准备请求",
-  "how.s3.copy": "确认送达信息，然后进入由服务器计价的安全付款链接。",
+  "how.s3.title": "付款并提交",
+  "how.s3.copy":
+    "确认送达信息，选择网络与币种，把显示的金额转到显示的地址，然后回填交易哈希。",
+  "how.s4.title": "保存收据",
+  "how.s4.copy":
+    "提交后立即生成收据，上面有订单编号的条形码与二维码。用这个编号即可跟踪订单直到完成。",
   "how.beforeKicker": "继续之前",
   "how.beforeTitle": "先核对是否可售与条款。",
   "how.beforeCopy":
@@ -114,23 +118,23 @@ export const zh: Record<MessageKey, string> = {
   "support.title": "写信过来，",
   "support.emphasis": "我们自己看。",
   "support.copy":
-    "订单、付款链接和送达问题，都由 Telegram 上的人工台处理。若与某笔订单有关，请带上付款链接编号。",
+    "订单、付款和送达问题，都由 Telegram 上的人工台处理。若与某笔订单有关，请带上收据上的订单编号。",
   "support.desk": "客服台",
   "support.message": "联系 @{handle}",
   "support.deskCopy":
-    "这是个人 Telegram 账号，不是截图机器人。可询问是否可售、付款进度，或尚未送达的订单。Curialy 这边由真人打开每一条消息。",
+    "这是个人 Telegram 账号，不是截图机器人。可询问是否可售、订单进度，或尚未送达的订单。Curialy 这边由真人打开每一条消息。",
   "support.reply": "通常一天内回复。只有在核对转账或履约时才会更久。",
-  "support.send": "若问题与订单有关，请发送付款链接编号、方案和送达账号。",
+  "support.send": "若问题与订单有关，请发送收据上的订单编号、方案和送达账号。",
   "support.open": "打开 Telegram · @{handle}",
   "support.card": "联络卡片",
   "support.handle": "我们处理什么",
-  "support.handleCopy": "订单状态、未送达、付款链接问题、退款。",
+  "support.handleCopy": "订单状态、未送达、付款问题、退款。",
   "support.never": "我们从不索要",
   "support.neverCopy": "密码、恢复短语、钱包助记词，或密钥截图。",
   "support.t1.title": "方案是否可售",
   "support.t1.copy": "可售状态直接写在方案卡片上。暂不可售的方案无法放入购物袋。",
   "support.t2.title": "订单请求",
-  "support.t2.copy": "用购物袋整理一份简短请求。本站提供付款链接，不是付款确认。",
+  "support.t2.copy": "用购物袋整理一份简短请求。提交交易哈希会生成订单与收据，但本身并不等于付款确认。",
   "support.t3.title": "适用条件与条款",
   "support.t3.copy": "在所选渠道发送请求前，请先核对时长、地区限制与服务商条款。",
   "support.missKicker": "若订单始终未送达",
@@ -139,7 +143,7 @@ export const zh: Record<MessageKey, string> = {
   "support.missCta": "阅读退款政策",
   "support.docsKicker": "需要商店指南？",
   "support.docsTitle": "从说明开始。",
-  "support.docsCopy": "可售规则、购物袋用法和付款链接流程，都写在同一份参考里。",
+  "support.docsCopy": "可售规则、购物袋用法、收据与订单查询，都写在同一份参考里。",
   "support.docsCta": "打开说明",
 
   "refund.kicker": "退款政策",
@@ -157,7 +161,7 @@ export const zh: Record<MessageKey, string> = {
     "款项已收而履约无法完成时应当退款——方案未出现在约定账号、经认真尝试仍无法完成送达，或我们确认订单已付款却在我方丢失。",
   "refund.s3.title": "如何申请",
   "refund.s3.copy":
-    "在 Telegram 联系 @{handle}，附上付款链接编号、方案，以及结账时填写的送达信息（例如 X 用户名）。我们确认未送达后，按相同网络与币种退回相同金额。",
+    "在 Telegram 联系 @{handle}，附上收据上的订单编号、方案，以及结账时填写的送达信息（例如 X 用户名）。我们确认未送达后，按相同网络与币种退回相同金额。",
   "refund.s4.title": "多久处理",
   "refund.s4.copy":
     "一旦核实订单未送达即处理。通常从你留言起几天内完成。已确认的未送达，不会被卡在工单迷宫里。",
@@ -165,14 +169,14 @@ export const zh: Record<MessageKey, string> = {
   "refund.s5.copy":
     "方案已在你的账号上正常使用后改变主意，不属于退款。访问已按说明交付后，与第三方服务的后续争议，也不在本政策范围内。",
   "refund.waitTitle": "订单还在等？",
-  "refund.waitCopy": "把付款链接编号带到 Telegram。若未能到达你手中，就应当退款。",
+  "refund.waitCopy": "把收据上的订单编号带到 Telegram。若未能到达你手中，就应当退款。",
   "refund.message": "联系客服",
   "refund.desk": "客服台",
 
   "docs.kicker": "商店说明",
   "docs.title": "必要事项，",
   "docs.emphasis": "集中在一处。",
-  "docs.copy": "使用本参考了解可售状态、方案选择，以及下单前的准备流程。",
+  "docs.copy": "使用本参考了解可售状态、方案选择、订单如何付款，以及如何用收据上的编号查询订单状态。",
   "docs.contents": "目录",
   "docs.s1.title": "选择方案",
   "docs.s1.copy":
@@ -183,17 +187,29 @@ export const zh: Record<MessageKey, string> = {
   "docs.s3.title": "使用购物袋",
   "docs.s3.copy":
     "购物袋支持改数量、移除和预估合计。它用来准备请求，而不是当场收款。",
-  "docs.s4.title": "打开付款链接",
+  "docs.s4.title": "你的订单编号",
   "docs.s4.copy":
-    "从购物袋继续，获得不透明的付款链接。选择网络与币种，然后手动转账或连接钱包。",
-  "docs.s5.title": "人工客服",
+    "从购物袋继续即可创建订单，并获得一个简短编号，例如 CLY-7K3M2QX9。之后查询订单、联系客服都用这个编号。它会显示在页面上，也印在收据上。",
+  "docs.s5.title": "付款",
   "docs.s5.copy":
-    "问题请发到 Telegram 的 @Curialy。由真人查看。若与某笔订单有关，请附上付款链接编号。",
-  "docs.s6.title": "退款",
+    "先选择你要转出的网络，再选择币种。应付金额与收款地址会一起显示；用任意钱包把该金额转到该地址，再回填交易哈希。仅支持手动转账，本站没有连接钱包功能。",
+  "docs.s6.title": "稳定币与原生币",
   "docs.s6.copy":
+    "USDC 与 USDT 的金额按美元固定。原生币按参考汇率换算，汇率在你选定币种时锁定到该订单，因此页面显示的金额就是最终金额。",
+  "docs.s7.title": "你的收据",
+  "docs.s7.copy":
+    "提交交易哈希后会立即生成收据，包含订单编号、送达账号、商品、金额、收款地址与交易哈希，并带有订单编号的条形码，以及可直接打开订单状态页的二维码。收据可下载，并会随状态变化自动更新。",
+  "docs.s8.title": "查询订单",
+  "docs.s8.copy":
+    "随时在订单状态页输入编号即可查询。大小写和 CLY- 前缀都可省略。状态依次为：待付款、提交哈希后的待审核、审核中的确认中，最后为已完成或已拒绝。未付款订单三十分钟后过期。",
+  "docs.s9.title": "人工客服",
+  "docs.s9.copy":
+    "有问题请到 Telegram 找 @Curialy。由真人查看。若与某笔订单有关，请附上订单编号。",
+  "docs.s10.title": "退款",
+  "docs.s10.copy":
     "已付款的订单若未能到达你指定的账号，我们退款。完整表述见退款政策页。",
   "docs.readyTitle": "准备浏览方案？",
-  "docs.readyCopy": "返回商店查看当前状态与可购方案。",
+  "docs.readyCopy": "返回商店查看当前状态与可购方案，或用编号查询已有订单。",
   "docs.visit": "进入商店",
   "docs.refund": "退款政策",
 
@@ -207,7 +223,7 @@ export const zh: Record<MessageKey, string> = {
   "ref.s1.title": "1. 你分享专属链接",
   "ref.s1.copy": "下方已准备好你的专属链接。请分享给真正有兴趣的人。",
   "ref.s2.title": "2. 朋友下单",
-  "ref.s2.copy": "他们通过链接进入、创建付款会话，并选择支付方式。",
+  "ref.s2.copy": "对方通过链接下单，并按自己偏好的网络与币种付款。",
   "ref.s3.title": "3. 支付系统核实",
   "ref.s3.copy": "核实检查的是真实链上转账，而不仅是截图或提交的哈希。",
   "ref.s4.title": "4. 符合条件的奖励出现",

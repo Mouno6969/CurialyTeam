@@ -15,6 +15,10 @@ function Documentation() {
     { id: "04", title: t("docs.s4.title"), copy: t("docs.s4.copy") },
     { id: "05", title: t("docs.s5.title"), copy: t("docs.s5.copy") },
     { id: "06", title: t("docs.s6.title"), copy: t("docs.s6.copy") },
+    { id: "07", title: t("docs.s7.title"), copy: t("docs.s7.copy") },
+    { id: "08", title: t("docs.s8.title"), copy: t("docs.s8.copy") },
+    { id: "09", title: t("docs.s9.title"), copy: t("docs.s9.copy") },
+    { id: "10", title: t("docs.s10.title"), copy: t("docs.s10.copy") },
   ];
 
   return (
