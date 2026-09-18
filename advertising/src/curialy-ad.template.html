@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Curialy — Subscriptions, made simple.</title>
+<style>
+/* ══════════════════════════════════════════════════════════════
+   Curialy · brand spot
+   A dark, classical storefront motion piece.
+   1920×1080 · 30 fps · 60.000 s · every frame reproducible
+   ══════════════════════════════════════════════════════════════ */
+
+@font-face{font-family:"Instrument Serif";src:url("__ASSET:InstrumentSerif-Regular.ttf__") format("truetype");font-weight:400;font-style:normal;font-display:block}
+@font-face{font-family:"Instrument Sans";src:url("__ASSET:InstrumentSans%5Bwdth%2Cwght%5D.ttf__") format("truetype");font-weight:100 900;font-stretch:75% 100%;font-display:block}
+@font-face{font-family:"IBM Plex Mono";src:url("__ASSET:IBMPlexMono-Regular.ttf__") format("truetype");font-weight:400;font-display:block}
+@font-face{font-family:"IBM Plex Mono";src:url("__ASSET:IBMPlexMono-SemiBold.ttf__") format("truetype");font-weight:600;font-display:block}
+
+@property --m{syntax:"<percentage>";inherits:false;initial-value:0%}
+
+:root{
+  --bg:#09090b; --fg:#f4f4f5;
+  --card:#111114; --secondary:#18181c;
+  --muted-fg:#a1a1aa;
+  --accent:#c4c8d0; --silver:#8a8e96;
+  --paper:#f6f3ec; --paper2:#eae5d9; --ink:#16161a;
+  --border:rgba(244,244,245,.10); --border-2:rgba(244,244,245,.16);
+  --destructive:#c45c5c; --good:#7fae8a;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --ease-io:cubic-bezier(.4,0,.2,1);
+  --sans:"Instrument Sans",system-ui,sans-serif;
+  --serif:"Instrument Serif",Georgia,serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#000;overflow:hidden}
+body{font-family:var(--sans);color:var(--fg);-webkit-font-smoothing:antialiased;
+  font-feature-settings:"ss01" on,"cv11" on}
+img{display:block}
+
+#stage{position:relative;width:1920px;height:1080px;background:var(--bg);overflow:hidden}
+.layer{position:absolute;inset:0}
+
+#dots{background-image:url("__ASSET:radial-dots.svg__");background-size:cover;background-position:center;
+  will-change:opacity,transform;animation:dotsBreathe 15000ms ease-in-out infinite alternate}
+@keyframes dotsBreathe{from{opacity:.30;transform:scale(1.02)}to{opacity:.58;transform:scale(1)}}
+
+#grain{opacity:.05;will-change:transform}
+#vig{background:
+  radial-gradient(125% 95% at 50% 46%,transparent 36%,rgba(0,0,0,.62) 100%),
+  radial-gradient(58% 46% at 50% 50%,rgba(196,200,208,.05),transparent 72%)}
+
+/* ── animation primitives ──────────────────────────────────────
+   Every animated element carries an absolute delay (--d) into the
+   60 s master timeline, so the renderer only has to pause and seek. */
+.rise  {animation:rise  var(--dur,700ms) var(--ease) var(--d,0ms) both}
+.fade  {animation:fade  var(--dur,700ms) var(--ease) var(--d,0ms) both}
+.pop   {animation:pop   var(--dur,700ms) var(--ease) var(--d,0ms) both}
+.inL   {animation:inL   var(--dur,760ms) var(--ease) var(--d,0ms) both}
+.inR   {animation:inR   var(--dur,760ms) var(--ease) var(--d,0ms) both}
+.blurIn{animation:blurIn var(--dur,900ms) var(--ease) var(--d,0ms) both}
+.grow  {animation:grow  var(--dur,700ms) var(--ease) var(--d,0ms) both;transform-origin:left center}
+@keyframes rise  {from{opacity:0;transform:translateY(22px);filter:blur(7px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes fade  {from{opacity:0}to{opacity:1}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0}}
+@keyframes pop   {from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+@keyframes inL   {from{opacity:0;transform:translateX(-32px)}to{opacity:1;transform:none}}
+@keyframes inR   {from{opacity:0;transform:translateX(32px)}to{opacity:1;transform:none}}
+@keyframes blurIn{from{opacity:0;filter:blur(16px);transform:scale(.96)}to{opacity:1;filter:blur(0);transform:scale(1)}}
+@keyframes grow  {from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes modalIn{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes wipeR {from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes qrSweep{from{clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+                   to  {clip-path:polygon(120% 0,100% 0,100% 100%,100% 100%)}}
+/* 1 ms step animations = hard, seek-safe state swaps */
+@keyframes swap  {from{opacity:0}to{opacity:1}}
+@keyframes hold  {from{opacity:1}to{opacity:1}}
+@keyframes roll1 {from{transform:translateY(0)}to{transform:translateY(-1em)}}
+@keyframes roll3 {from{transform:translateY(0)}to{transform:translateY(-3em)}}
+@keyframes roll6 {from{transform:translateY(-3em)}to{transform:translateY(-6em)}}
+
+/* ── typography ─────────────────────────────────────────────── */
+.kicker{font-family:var(--mono);font-size:15px;letter-spacing:.26em;text-transform:uppercase;color:var(--muted-fg)}
+.display{font-family:var(--serif);font-weight:400;letter-spacing:-.025em;line-height:1.02}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.ital{font-style:italic;color:var(--silver)}
+.tiny{font-family:var(--mono);font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted-fg)}
+
+/* ── persistent chrome ──────────────────────────────────────── */
+#bug{position:absolute;left:76px;top:60px;display:flex;align-items:center;gap:17px;z-index:40;
+  animation:bugIn 900ms var(--ease) 700ms both, fadeOut 400ms var(--ease-io) 53450ms forwards}
+@keyframes bugIn{from{opacity:0;transform:translate(-16px,-10px) scale(.84)}to{opacity:1;transform:none}}
+.bg-mark{width:52px;height:52px;flex:none}
+.bg-word{display:flex;flex-direction:column;gap:4px}
+.bg-word b{font-size:21px;font-weight:600;letter-spacing:.3em}
+.bg-word i{font-family:var(--mono);font-style:normal;font-size:12.5px;letter-spacing:.14em;color:var(--silver)}
+
+#tag{position:absolute;right:76px;top:70px;z-index:40;height:24px}
+.tagitem{position:absolute;right:0;top:0;white-space:nowrap;display:flex;align-items:center;gap:12px}
+.tagitem em{font-style:normal;font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--silver)}
+.tagitem s{width:44px;height:1px;background:var(--border-2);text-decoration:none}
+.tagitem b{font-family:var(--mono);font-size:13.5px;font-weight:400;letter-spacing:.18em;text-transform:uppercase}
+
+#prog{position:absolute;left:0;bottom:0;height:2px;z-index:45;opacity:.8;
+  background:linear-gradient(90deg,rgba(196,200,208,.26),var(--accent));
+  animation:prog 60000ms linear both;transform-origin:left center}
+@keyframes prog{from{width:0}to{width:100%}}
+
+/* ── scenes ─────────────────────────────────────────────────── */
+.scene{position:absolute;inset:0;z-index:10;opacity:0}
+.scene.on{animation:scIn 480ms var(--ease) var(--si) both, scOut 420ms var(--ease-io) var(--so) forwards}
+@keyframes scIn {from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes scOut{from{opacity:1}to{opacity:0}}
+
+/* ── shared atoms ───────────────────────────────────────────── */
+.card{background:var(--card);border-radius:20px;box-shadow:0 0 0 1px var(--border),0 34px 80px -56px #000}
+.dotfield{background-image:radial-gradient(circle,rgba(196,200,208,.30) 1px,transparent 1.15px);background-size:11px 11px}
+.badge{position:absolute;border-radius:999px;padding:7px 15px;font-family:var(--mono);font-size:11.5px;
+  letter-spacing:.16em;text-transform:uppercase;background:rgba(244,244,245,.06);color:var(--muted-fg);
+  box-shadow:0 0 0 1px var(--border)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:10px;
+  background:var(--fg);color:var(--bg);font-weight:600;font-size:16px;padding:14px 24px;position:relative;white-space:nowrap}
+.btn.ghost{background:transparent;color:var(--fg);box-shadow:0 0 0 1px var(--border-2)}
+.spacer{flex:1}
+
+/* swap slot — stack N children, each fading in/out on its own beat */
+.swap{position:relative;display:inline-block;vertical-align:bottom}
+.swap>*{position:absolute;left:0;top:0;white-space:nowrap}
+
+/* pill chips with a declarative selected layer */
+.pill{position:relative;display:inline-block;border-radius:9px;font-size:15px;font-weight:500;white-space:nowrap;color:var(--muted-fg);
+  box-shadow:0 0 0 1px var(--border)}
+.pill>*{display:block;padding:11px 19px}
+.pill>.pillLabel{position:relative;z-index:1}
+.pill>.pillSel{position:absolute;inset:0;padding:0;border-radius:9px;background:var(--fg);color:var(--bg);font-weight:600;z-index:2;opacity:0}
+.pill>.pillSel>span{display:block;padding:11px 19px}
+.pill.dim{opacity:.42}
+
+/* digit roll */
+.roll{display:inline-block;height:1em;line-height:1;overflow:hidden;vertical-align:baseline}
+.roll>span{display:block;height:1em}
+.roll i{display:block;height:1em;line-height:1;font-style:normal}
+
+/* typewriter */
+.typing{overflow:hidden;display:inline-block;white-space:nowrap;vertical-align:bottom;
+  animation:type var(--dur,900ms) steps(var(--steps,14),end) var(--d,0ms) both}
+@keyframes type{from{width:0}to{width:var(--w,100%)}}
+.caret{display:inline-block;width:2px;height:1em;background:var(--accent);vertical-align:-.14em;margin-left:3px;
+  animation:blink 620ms steps(1,end) infinite, hold 1ms linear var(--dstop,99999ms) forwards}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+/* network tile with declarative selection */
+.netTile{position:relative;border-radius:14px;padding:20px 22px;background:var(--secondary);
+  box-shadow:0 0 0 1px var(--border)}
+.netTile .ntLabel{display:flex;align-items:center;gap:14px;position:relative;z-index:1}
+.netTile .ntLabel b{font-size:15.5px;font-weight:600;display:block}
+.netTile .ntLabel i{font-style:normal;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--silver);display:block;margin-top:4px}
+.netTile img{width:30px;height:30px;flex:none}
+.netSel{position:absolute;inset:0;border-radius:14px;opacity:0;z-index:0;
+  background:rgba(196,200,208,.10);box-shadow:0 0 0 1.5px rgba(196,200,208,.55),0 0 40px -12px rgba(196,200,208,.35)}
+
+/* receipt paper */
+.paper{background:var(--paper);color:var(--ink);border-radius:14px;
+  box-shadow:0 44px 100px -54px rgba(0,0,0,.95),0 0 0 1px rgba(22,22,26,.10),0 0 100px rgba(246,243,236,.10)}
+.pk{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:#7a7a72}
+.pv{font-family:var(--mono);font-size:13px;color:var(--ink)}
+.qchip{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-fg);
+  padding:9px 15px;border-radius:999px;box-shadow:0 0 0 1px var(--border);background:rgba(244,244,245,.03);white-space:nowrap}
+.coinRow{display:flex;align-items:center;gap:11px;top:0}
+.coinRow .cnet{font-family:var(--mono);font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-fg);width:186px}
+.coinRow .cdiv{width:1px;height:20px;background:var(--border-2);margin-right:6px}
+.cpill{font-size:13.5px}
+.cpill>*{padding:9px 15px}
+.pr{display:flex;align-items:center}
+.pr>span:first-child{color:#3a3a36}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="layer" id="dots"></div>
+  <div class="layer" id="vig"></div>
+  <canvas class="layer" id="grain" width="1920" height="1080"></canvas>
+
+  <!-- ══ persistent chrome ══════════════════════════════════ -->
+  <div id="bug">
+    <svg class="bg-mark" viewBox="0 0 512 512" aria-hidden="true">
+      <circle cx="256" cy="256" r="228" fill="none" stroke="#6a6e76" stroke-width="18"
+        stroke-dasharray="670 48" stroke-dashoffset="359"/>
+      <path fill="#f5f5f6" d="M339.2 181.0 A112 112 0 1 0 339.2 331.0 L303.55 298.82 A64 64 0 1 1 303.55 213.18 Z"/>
+    </svg>
+    <span class="bg-word"><b>CURIALY</b><i>curialy.com</i></span>
+  </div>
+
+  <div id="tag">
+    <div class="tagitem" style="animation:fade 520ms var(--ease) 760ms both, fadeOut 360ms var(--ease-io) 7808ms forwards"><em>01</em><s></s><b>Independent digital shop</b></div>
+    <div class="tagitem" style="animation:fade 460ms var(--ease) 8028ms both, fadeOut 360ms var(--ease-io) 17496ms forwards"><em>02</em><s></s><b>The shop</b></div>
+    <div class="tagitem" style="animation:fade 460ms var(--ease) 17716ms both, fadeOut 360ms var(--ease-io) 25565ms forwards"><em>03</em><s></s><b>Selection to request</b></div>
+    <div class="tagitem" style="animation:fade 460ms var(--ease) 25785ms both, fadeOut 360ms var(--ease-io) 39041ms forwards"><em>04</em><s></s><b>Pay privately</b></div>
+    <div class="tagitem" style="animation:fade 460ms var(--ease) 39261ms both, fadeOut 360ms var(--ease-io) 46300ms forwards"><em>05</em><s></s><b>Your receipt</b></div>
+    <div class="tagitem" style="animation:fade 460ms var(--ease) 46520ms both, fadeOut 360ms var(--ease-io) 53500ms forwards"><em>06</em><s></s><b>A person, and a promise</b></div>
+  </div>
+
+  <div id="prog"></div>
+
+  <!-- ══ SCENE 1 · hook & brand ─── 0.000 – 7.868 ═══════════ -->
+  <section class="scene on" style="--si:0ms;--so:7668ms">
+    <!-- beat A: the mark, then the hook -->
+    <div style="position:absolute;left:0;right:0;top:168px;text-align:center;
+      animation:fadeIn 860ms var(--ease) 60ms both, fadeOut 460ms var(--ease-io) 4300ms forwards">
+      <svg viewBox="0 0 512 512" style="width:152px;height:152px;display:inline-block">
+        <circle cx="256" cy="256" r="228" fill="none" stroke="#6a6e76" stroke-width="16"
+          stroke-dasharray="1432" style="animation:drawRing 1150ms var(--ease) 140ms both"/>
+        <path fill="#f5f5f6" d="M339.2 181.0 A112 112 0 1 0 339.2 331.0 L303.55 298.82 A64 64 0 1 1 303.55 213.18 Z"
+          style="animation:pop 800ms var(--ease) 300ms both"/>
+      </svg>
+    </div>
+
+    <div style="position:absolute;left:0;right:0;top:520px;text-align:center;
+      animation:fadeOut 420ms var(--ease-io) 4520ms forwards">
+      <h1 class="display rise" style="--d:889ms;--dur:660ms;font-size:80px">You want the subscription.</h1>
+      <h1 class="display rise" style="--d:2488ms;--dur:660ms;font-size:80px;color:var(--silver);margin-top:16px">
+        You don't want
+        <span style="position:relative;display:inline-block;white-space:nowrap">
+          <span style="opacity:.62">the runaround.</span>
+          <span style="position:absolute;left:-3px;top:50%;height:5px;width:calc(100% + 6px);background:var(--destructive);
+            border-radius:3px;transform-origin:left center;animation:grow 540ms var(--ease) 3010ms both"></span>
+        </span>
+      </h1>
+    </div>
+
+    <!-- beat B: what Curialy is -->
+    <div style="position:absolute;left:0;right:0;top:392px;text-align:center;
+      animation:fade 460ms var(--ease) 4522ms both, fadeOut 380ms var(--ease-io) 7420ms forwards">
+      <p class="kicker" style="animation:fade 620ms var(--ease) 4530ms both">Independent digital subscription store</p>
+      <h2 class="display" style="font-size:76px;margin-top:26px;white-space:nowrap;
+        animation:blurIn 820ms var(--ease) 4640ms both">Clear options. Transparent pricing.</h2>
+      <div style="display:flex;align-items:center;justify-content:center;gap:24px;margin-top:68px">
+        <span style="display:flex;gap:20px;align-items:center">
+          <img src="__ASSET:x-logo.svg__" style="width:38px;height:38px;background:#f4f4f5;border-radius:9px;padding:7px;animation:pop 520ms var(--ease) 5200ms both">
+          <img src="__ASSET:google-ai-mark.svg__" style="width:38px;height:38px;opacity:.9;animation:pop 520ms var(--ease) 5290ms both">
+        </span>
+        <span style="width:1px;height:30px;background:var(--border-2);animation:fade 400ms linear 5380ms both"></span>
+        <span style="display:flex;gap:13px;align-items:center">
+          <img src="__ASSET:net-ethereum.svg__" style="width:30px;height:30px;animation:pop 460ms var(--ease) 5430ms both">
+          <img src="__ASSET:net-solana.svg__" style="width:30px;height:30px;animation:pop 460ms var(--ease) 5500ms both">
+          <img src="__ASSET:net-polygon.svg__" style="width:30px;height:30px;animation:pop 460ms var(--ease) 5570ms both">
+          <img src="__ASSET:net-bnb.svg__" style="width:30px;height:30px;animation:pop 460ms var(--ease) 5640ms both">
+          <img src="__ASSET:net-avalanche.svg__" style="width:30px;height:30px;animation:pop 460ms var(--ease) 5710ms both">
+          <img src="__ASSET:net-base.svg__" style="width:30px;height:30px;animation:pop 460ms var(--ease) 5780ms both">
+        </span>
+        <span style="width:1px;height:30px;background:var(--border-2);animation:fade 400ms linear 5850ms both"></span>
+        <span style="display:flex;gap:13px;align-items:center">
+          <img src="__ASSET:coin-usdc.svg__" style="width:30px;height:30px;animation:pop 460ms var(--ease) 5900ms both">
+          <img src="__ASSET:coin-usdt.svg__" style="width:30px;height:30px;animation:pop 460ms var(--ease) 5970ms both">
+        </span>
+      </div>
+      <p class="tiny" style="margin-top:32px;animation:fade 720ms var(--ease) 6150ms both">
+        Six networks &nbsp;·&nbsp; USDC / USDT &nbsp;·&nbsp; guest checkout
+      </p>
+    </div>
+  </section>
+
+  <!-- ══ SCENE 2 · the shop ─── 7.868 – 17.556 ══════════════ -->
+  <section class="scene on" style="--si:7668ms;--so:17356ms">
+    <div style="position:absolute;left:212px;right:212px;top:156px;display:flex;align-items:flex-end;justify-content:space-between">
+      <div>
+        <p class="kicker inL" style="--d:7870ms;--dur:520ms">The shop</p>
+        <h2 class="display inL" style="--d:7930ms;--dur:640ms;font-size:70px;margin-top:16px">
+          Choose your plan.
+          <span style="display:block;height:4px;background:var(--accent);border-radius:2px;margin-top:14px;width:236px;
+            transform-origin:left center;animation:grow 700ms var(--ease) 8298ms both"></span>
+        </h2>
+      </div>
+      <p class="inR" style="--d:7990ms;--dur:640ms;max-width:430px;font-size:17px;line-height:1.65;color:var(--muted-fg);text-align:right">
+        Select a duration on any card, then add your preferred plan to the bag.
+      </p>
+    </div>
+
+    <div style="position:absolute;left:212px;right:212px;top:392px;display:flex;gap:34px;align-items:stretch">
+
+      <div style="flex:1;display:flex;animation:cardXhover 700ms var(--ease) 9410ms both">
+        <article class="card inL" style="--d:7960ms;--dur:760ms;flex:1;overflow:hidden;display:flex;flex-direction:column">
+          <div style="position:relative;height:250px;overflow:hidden;flex:none">
+            <div class="dotfield" style="position:absolute;inset:0;opacity:.8"></div>
+            <div style="position:absolute;inset:16px;border-radius:12px;box-shadow:0 0 0 1px var(--border)"></div>
+            <svg viewBox="0 0 200 200" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:200px;height:200px;color:var(--silver);opacity:.34">
+              <circle cx="100" cy="100" r="91" fill="none" stroke="currentColor" stroke-width="3.2" stroke-dasharray="271 15" stroke-dashoffset="143"/>
+            </svg>
+            <span class="badge" style="left:26px;top:26px">Social plan</span>
+            <img src="__ASSET:x-logo.svg__" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:74px;height:74px;background:#f4f4f5;border-radius:18px;padding:14px">
+          </div>
+          <div style="padding:28px 30px 30px;display:flex;flex-direction:column;flex:1">
+            <h3 class="display" style="font-size:38px">X Premium</h3>
+            <p style="margin-top:12px;font-size:15.5px;line-height:1.62;color:var(--muted-fg);flex:1">
+              A clear duration for premium social features, delivered with next-step guidance.
+            </p>
+            <div style="display:flex;gap:11px;margin-top:22px;flex:none">
+              <span class="pill"><span class="pillLabel">3 months</span>
+                <span class="pillSel" style="animation:swap 1ms step-end 10592ms both, fadeOut 260ms ease 12904ms forwards"><span>3 months</span></span></span>
+              <span class="pill"><span class="pillLabel">6 months</span>
+                <span class="pillSel" style="animation:swap 1ms step-end 12904ms both"><span>6 months</span></span></span>
+            </div>
+            <div style="display:flex;margin-top:26px;padding-top:22px;border-top:1px solid var(--border);align-items:flex-end;flex:none">
+              <div>
+                <p class="tiny" style="animation:fade 420ms var(--ease) 10630ms both">Plan price</p>
+                <div style="display:flex;gap:14px;align-items:baseline;margin-top:9px">
+                  <span class="display" style="font-size:60px;display:flex;align-items:flex-start">
+                    <span style="font-size:34px;line-height:1.5;color:var(--silver)">$</span>
+                    <span class="roll"><span style="animation:roll3 900ms var(--ease) 10592ms both, roll6 900ms var(--ease) 12904ms forwards">
+                      <i>0</i><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i><i>0</i><i>1</i><i>2</i><i>3</i>
+                    </span></span>
+                  </span>
+                  <span class="swap" style="width:34px;height:26px">
+                    <s style="font-family:var(--mono);font-size:20px;color:var(--muted-fg);text-decoration:line-through;
+                      animation:fade 300ms linear 11620ms both, fadeOut 260ms linear 12904ms forwards">$4</s>
+                    <s style="font-family:var(--mono);font-size:20px;color:var(--muted-fg);text-decoration:line-through;
+                      animation:fade 300ms linear 13020ms both">$8</s>
+                  </span>
+                </div>
+              </div>
+              <span class="spacer"></span>
+              <span class="btn">Add to bag</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div style="flex:1;display:flex;animation:cardAIhover 700ms var(--ease) 14430ms both">
+        <article class="card inR" style="--d:8160ms;--dur:760ms;flex:1;overflow:hidden;display:flex;flex-direction:column">
+          <div style="position:relative;height:250px;overflow:hidden;flex:none">
+            <div class="dotfield" style="position:absolute;inset:0;opacity:.8"></div>
+            <div style="position:absolute;inset:16px;border-radius:12px;box-shadow:0 0 0 1px var(--border)"></div>
+            <svg viewBox="0 0 200 200" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:200px;height:200px;color:var(--silver);opacity:.34">
+              <circle cx="100" cy="100" r="91" fill="none" stroke="currentColor" stroke-width="3.2" stroke-dasharray="271 15" stroke-dashoffset="143"/>
+            </svg>
+            <span class="badge" style="left:26px;top:26px">AI plan</span>
+            <span class="badge" style="right:26px;top:26px">Unavailable</span>
+            <img src="__ASSET:google-ai-mark.svg__" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:74px;height:74px;opacity:.92">
+          </div>
+          <div style="padding:28px 30px 30px;display:flex;flex-direction:column;flex:1">
+            <h3 class="display" style="font-size:38px">Google AI</h3>
+            <p style="margin-top:12px;font-size:15.5px;line-height:1.62;color:var(--muted-fg);flex:1">
+              Flexible access periods for AI tools, with the plan length set before you request an order.
+            </p>
+            <div style="display:flex;gap:11px;margin-top:22px;flex:none">
+              <span class="pill dim" style="animation:fade 460ms var(--ease) 14430ms both"><span class="pillLabel">1 month</span></span>
+              <span class="pill dim" style="animation:fade 460ms var(--ease) 14520ms both"><span class="pillLabel">3 months</span></span>
+              <span class="pill dim" style="animation:fade 460ms var(--ease) 14610ms both"><span class="pillLabel">6 months</span></span>
+              <span class="pill dim" style="animation:fade 460ms var(--ease) 14700ms both"><span class="pillLabel">12 months</span></span>
+            </div>
+            <div style="display:flex;margin-top:26px;padding-top:22px;border-top:1px solid var(--border);align-items:flex-end;flex:none">
+              <div>
+                <p class="tiny">Plan price</p>
+                <div class="display" style="font-size:60px;display:flex;align-items:flex-start;margin-top:9px">
+                  <span style="font-size:34px;line-height:1.5;color:var(--silver)">$</span><span>10</span>
+                </div>
+              </div>
+              <span class="spacer"></span>
+              <span class="btn ghost" style="opacity:.5;animation:fade 460ms var(--ease) 14790ms both">Currently unavailable</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SCENE 3 · selection → request ─── 17.556 – 25.625 ══ -->
+  <section class="scene on" style="--si:17356ms;--so:25425ms">
+    <div style="position:absolute;left:196px;top:250px;width:620px">
+      <p class="kicker inL" style="--d:17600ms;--dur:520ms">Your selection</p>
+      <h2 class="display inL" style="--d:17680ms;--dur:680ms;font-size:64px;margin-top:16px">Add it to the bag.</h2>
+      <p class="inL" style="--d:17760ms;--dur:680ms;margin-top:20px;font-size:17px;line-height:1.65;color:var(--muted-fg);max-width:500px">
+        The bag supports quantity changes, removal, and an estimated total. It prepares a request — it never collects payment.
+      </p>
+      <div class="card inL" style="--d:18200ms;--dur:680ms;margin-top:40px;padding:20px 22px;display:flex;align-items:center;gap:16px">
+        <img src="__ASSET:x-logo.svg__" style="width:42px;height:42px;background:#f4f4f5;border-radius:11px;padding:9px">
+        <span style="display:flex;flex-direction:column;gap:5px">
+          <b style="font-size:16px">X Premium</b>
+          <i style="font-family:var(--mono);font-style:normal;font-size:12.5px;color:var(--silver)">3 months · $3.00</i>
+        </span>
+        <span class="spacer"></span>
+        <span class="btn" id="addBtn" style="padding:12px 20px;font-size:14.5px">
+          Add to bag
+          <span style="position:absolute;inset:0;border-radius:10px;background:#fff;opacity:0;
+            animation:press 620ms var(--ease) 19480ms both"></span>
+        </span>
+      </div>
+    </div>
+
+    <aside class="card" style="position:absolute;right:96px;top:132px;width:566px;bottom:132px;padding:34px 36px;
+      animation:inR 760ms var(--ease) 17990ms both">
+      <div class="pr" style="padding-bottom:20px;border-bottom:1px solid var(--border)">
+        <span style="display:flex;flex-direction:column;gap:9px">
+          <i class="tiny" style="font-style:normal">Your selection</i>
+          <b class="display" style="font-size:32px;font-weight:400;color:var(--fg)">Shopping bag
+            <span class="mono" style="font-size:22px;color:var(--silver)">(<span class="roll" style="height:1em"><span style="animation:roll1 1ms step-end 20000ms both"><i style="font-family:var(--mono);font-size:22px;color:var(--silver)">0</i><i style="font-family:var(--mono);font-size:22px;color:var(--silver)">1</i></span></span>)</span></b>
+        </span>
+      </div>
+
+      <p style="margin-top:48px;font-size:16px;line-height:1.7;color:var(--muted-fg);
+        animation:fade 420ms var(--ease) 18200ms both, fadeOut 300ms var(--ease-io) 19520ms forwards">
+        Your bag is open. Choose a plan and it will appear here, ready to become an order.
+      </p>
+
+      <div style="position:absolute;left:36px;right:36px;top:170px;padding:18px 20px;border-radius:13px;background:var(--secondary);
+        animation:rise 560ms var(--ease) 19860ms both">
+        <div class="pr">
+          <span style="display:flex;flex-direction:column;gap:6px">
+            <b style="font-size:15.5px;color:var(--fg)">X Premium</b>
+            <i style="font-family:var(--mono);font-style:normal;font-size:12.5px;color:var(--silver)">3 months · × 1</i>
+          </span>
+          <span class="spacer"></span>
+          <b class="mono" style="font-size:17px">$3.00</b>
+        </div>
+      </div>
+
+      <div style="position:absolute;left:36px;right:36px;bottom:34px">
+        <div class="pr" style="padding-top:22px;border-top:1px solid var(--border)">
+          <span class="tiny" style="flex:1">Estimated total</span>
+          <b class="display" style="font-size:38px;font-weight:400">$3.00</b>
+        </div>
+        <div class="btn" style="width:100%;margin-top:22px;animation:fade 460ms var(--ease) 20050ms both">Continue to payment</div>
+        <p class="tiny" style="margin-top:18px;letter-spacing:.05em;text-transform:none;font-size:11.5px;line-height:1.7;
+          animation:fade 460ms var(--ease) 20150ms both">
+          You will choose a network and coin on the next page, then send the exact amount shown.
+        </p>
+      </div>
+
+      <span class="badge" style="left:-20px;top:-20px;background:var(--fg);color:var(--bg);font-weight:600;font-size:15px;padding:9px 17px;
+        animation:pop 560ms var(--ease) 20000ms both">1</span>
+    </aside>
+
+    <div style="position:absolute;inset:0;background:rgba(9,9,11,.74);animation:fade 460ms ease 20720ms both"></div>
+    <div class="card" style="position:absolute;left:50%;top:50%;width:760px;margin-left:-380px;margin-top:-256px;padding:44px 48px;
+      animation:modalIn 660ms var(--ease) 20720ms both">
+      <p class="kicker">One last detail</p>
+      <h3 class="display" style="font-size:40px;margin-top:16px">Where should we deliver X Premium?</h3>
+      <p style="margin-top:16px;font-size:16px;line-height:1.68;color:var(--muted-fg)">
+        Enter the exact X handle that should receive this purchase. Never enter a password, recovery code, or wallet secret.
+      </p>
+      <div style="display:flex;margin-top:30px;border-radius:12px;box-shadow:0 0 0 1px var(--border-2);padding:18px 20px;gap:14px;position:relative">
+        <span style="position:absolute;inset:0;border-radius:12px;opacity:0;
+          box-shadow:0 0 0 1.5px rgba(127,174,138,.55),inset 0 0 0 100px rgba(127,174,138,.07);
+          animation:swap 1ms step-end 22900ms both, fadeIn 400ms ease 22900ms both"></span>
+        <span class="mono" style="font-size:12px;letter-spacing:.14em;color:var(--silver)">X HANDLE</span>
+        <span style="width:1px;height:22px;background:var(--border)"></span>
+        <span class="mono" style="font-size:19px;display:inline-flex;align-items:baseline;position:relative;z-index:1">
+          <span class="typing" style="--w:125px;--steps:11;--dur:1150ms;--d:21400ms">@yourhandle</span><span class="caret" style="animation:blink 620ms steps(1,end) infinite, fadeOut 240ms linear 22900ms forwards"></span>
+        </span>
+        <span class="spacer"></span>
+        <span class="mono" style="font-size:20px;color:var(--good);animation:pop 440ms var(--ease) 22940ms both">✓</span>
+      </div>
+      <p class="tiny" style="margin-top:18px;letter-spacing:.05em;text-transform:none;font-size:11.5px;
+        animation:fade 420ms var(--ease) 23120ms both">Use 1–15 letters, numbers, or underscores.</p>
+    </div>
+  </section>
+
+  <!-- ══ SCENE 4 · pay privately ─── 25.625 – 39.101 ════════ -->
+  <section class="scene on" style="--si:25425ms;--so:38901ms">
+    <div style="position:absolute;left:158px;top:176px;width:452px">
+      <p class="kicker inL" style="--d:25650ms;--dur:520ms">Secure payment link</p>
+      <h2 class="display inL" style="--d:25720ms;--dur:680ms;font-size:60px;margin-top:16px">Then pay privately.</h2>
+      <p class="inL" style="--d:25800ms;--dur:680ms;margin-top:20px;font-size:16.5px;line-height:1.7;color:var(--muted-fg)">
+        Copy the network address and the exact amount, send from any wallet, then paste the transaction hash.
+        Manual transfer only — there is no wallet connection.
+      </p>
+      <div class="card inL" style="--d:34000ms;--dur:640ms;margin-top:36px;padding:22px 24px">
+        <p class="tiny">Payment summary</p>
+        <div class="pr" style="margin-top:15px"><span style="font-size:15px;color:var(--muted-fg)">X Premium · 3 months</span><span class="spacer"></span><b class="mono" style="font-size:15px">$3.00</b></div>
+        <div class="pr" style="margin-top:15px;padding-top:15px;border-top:1px solid var(--border)">
+          <span class="tiny" style="flex:1">Order</span><b class="mono" style="font-size:14px;letter-spacing:.1em;color:var(--fg)">CLY-7K3M2QX9</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="position:absolute;right:118px;top:176px;width:1032px;bottom:150px;padding:36px 40px;
+      animation:inR 760ms var(--ease) 25800ms both">
+
+      <div style="animation:fade 500ms var(--ease) 25860ms both, fadeOut 300ms var(--ease-io) 33740ms forwards">
+        <div style="display:flex;align-items:baseline;gap:16px">
+          <span class="tiny" style="color:var(--accent)">Step 1 of 3</span>
+          <h3 class="display" style="font-size:34px">Choose a network</h3>
+          <span class="spacer"></span>
+          <span class="tiny" style="letter-spacing:.05em;text-transform:none;font-size:12px">You choose the coin next.</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:44px">
+          <div class="netTile" style="animation:fade 480ms var(--ease) 26240ms both">
+            <span class="netSel" style="animation:swap 1ms step-end 27974ms both, fadeOut 260ms ease 28901ms forwards"></span>
+            <span class="ntLabel"><img src="__ASSET:net-ethereum.svg__"><span><b>Ethereum</b><i>USDC · USDT · ETH</i></span></span></div>
+          <div class="netTile" style="animation:fade 480ms var(--ease) 26320ms both">
+            <span class="netSel" style="animation:swap 1ms step-end 28901ms both, fadeOut 260ms ease 29940ms forwards"></span>
+            <span class="ntLabel"><img src="__ASSET:net-solana.svg__"><span><b>Solana</b><i>USDC · USDT · SOL</i></span></span></div>
+          <div class="netTile" style="animation:fade 480ms var(--ease) 26400ms both">
+            <span class="netSel" style="animation:swap 1ms step-end 29940ms both, fadeOut 260ms ease 30860ms forwards"></span>
+            <span class="ntLabel"><img src="__ASSET:net-polygon.svg__"><span><b>Polygon</b><i>USDC · USDT · POL</i></span></span></div>
+          <div class="netTile" style="animation:fade 480ms var(--ease) 26480ms both">
+            <span class="netSel" style="animation:swap 1ms step-end 30860ms both, fadeOut 260ms ease 32415ms forwards"></span>
+            <span class="ntLabel"><img src="__ASSET:net-bnb.svg__"><span><b>BNB Chain</b><i>USDC · USDT · BNB</i></span></span></div>
+          <div class="netTile" style="animation:fade 480ms var(--ease) 26560ms both">
+            <span class="netSel" style="animation:swap 1ms step-end 32415ms both, fadeOut 260ms ease 33264ms forwards"></span>
+            <span class="ntLabel"><img src="__ASSET:net-avalanche.svg__"><span><b>Avalanche C-Chain</b><i>USDC · USDT · AVAX</i></span></span></div>
+          <div class="netTile" style="animation:fade 480ms var(--ease) 26640ms both">
+            <span class="netSel" style="animation:swap 1ms step-end 33264ms both, fadeOut 260ms ease 33740ms forwards"></span>
+            <span class="ntLabel"><img src="__ASSET:net-base.svg__"><span><b>Base</b><i>USDC · USDT · ETH</i></span></span></div>
+        </div>
+        <p class="tiny" style="margin-top:30px;letter-spacing:.05em;text-transform:none;font-size:12px">
+          USDC and USDT amounts are fixed in dollars. Native coins are converted at a reference rate locked onto the order.
+        </p>
+
+        <div style="height:1px;background:var(--border);margin:36px 0 32px;
+          animation:fade 420ms var(--ease) 27300ms both"></div>
+
+        <div style="display:flex;align-items:center;gap:18px;animation:fade 560ms var(--ease) 27400ms both">
+          <span class="tiny" style="color:var(--accent)">Step 2 of 3</span>
+          <span class="swap" style="height:44px;min-width:760px">
+            <!-- the coin row follows the chosen network, step for step -->
+            <span class="coinRow" style="animation:swap 1ms step-end 26240ms both, fadeOut 240ms linear 28901ms forwards">
+              <b class="cnet">Ethereum</b><span class="cdiv"></span>
+              <span class="pill cpill"><span class="pillLabel">USDC</span><span class="pillSel" style="opacity:1"><span>USDC</span></span></span>
+              <span class="pill cpill"><span class="pillLabel">USDT</span></span>
+              <span class="pill cpill"><span class="pillLabel">ETH</span></span>
+            </span>
+            <span class="coinRow" style="animation:swap 1ms step-end 28901ms both, fadeOut 240ms linear 29940ms forwards">
+              <b class="cnet">Solana</b><span class="cdiv"></span>
+              <span class="pill cpill"><span class="pillLabel">USDC</span><span class="pillSel" style="opacity:1"><span>USDC</span></span></span>
+              <span class="pill cpill"><span class="pillLabel">USDT</span></span>
+              <span class="pill cpill"><span class="pillLabel">SOL</span></span>
+            </span>
+            <span class="coinRow" style="animation:swap 1ms step-end 29940ms both, fadeOut 240ms linear 30860ms forwards">
+              <b class="cnet">Polygon</b><span class="cdiv"></span>
+              <span class="pill cpill"><span class="pillLabel">USDC</span><span class="pillSel" style="opacity:1"><span>USDC</span></span></span>
+              <span class="pill cpill"><span class="pillLabel">USDT</span></span>
+              <span class="pill cpill"><span class="pillLabel">POL</span></span>
+            </span>
+            <span class="coinRow" style="animation:swap 1ms step-end 30860ms both, fadeOut 240ms linear 32415ms forwards">
+              <b class="cnet">BNB Chain</b><span class="cdiv"></span>
+              <span class="pill cpill"><span class="pillLabel">USDC</span><span class="pillSel" style="opacity:1"><span>USDC</span></span></span>
+              <span class="pill cpill"><span class="pillLabel">USDT</span></span>
+              <span class="pill cpill"><span class="pillLabel">BNB</span></span>
+            </span>
+            <span class="coinRow" style="animation:swap 1ms step-end 32415ms both, fadeOut 240ms linear 33264ms forwards">
+              <b class="cnet">Avalanche C-Chain</b><span class="cdiv"></span>
+              <span class="pill cpill"><span class="pillLabel">USDC</span><span class="pillSel" style="opacity:1"><span>USDC</span></span></span>
+              <span class="pill cpill"><span class="pillLabel">USDT</span></span>
+              <span class="pill cpill"><span class="pillLabel">AVAX</span></span>
+            </span>
+            <span class="coinRow" style="animation:swap 1ms step-end 33264ms both, fadeOut 240ms linear 33740ms forwards">
+              <b class="cnet">Base</b><span class="cdiv"></span>
+              <span class="pill cpill"><span class="pillLabel">USDC</span><span class="pillSel" style="opacity:1"><span>USDC</span></span></span>
+              <span class="pill cpill"><span class="pillLabel">USDT</span></span>
+              <span class="pill cpill"><span class="pillLabel">ETH</span></span>
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <div style="position:absolute;left:40px;right:40px;top:36px;animation:fade 560ms var(--ease) 33940ms both">
+        <div style="display:flex;align-items:baseline;gap:16px">
+          <span class="tiny" style="color:var(--accent)">Step 3 of 3</span>
+          <h3 class="display" style="font-size:34px">Payment instructions</h3>
+          <span class="spacer"></span>
+          <span style="display:flex;align-items:center;gap:10px;padding:9px 15px;border-radius:999px;background:var(--secondary)">
+            <img src="__ASSET:net-polygon.svg__" style="width:20px;height:20px"><span class="mono" style="font-size:12.5px">Polygon</span>
+            <span style="width:1px;height:14px;background:var(--border-2)"></span>
+            <img src="__ASSET:coin-usdc.svg__" style="width:20px;height:20px"><span class="mono" style="font-size:12.5px">USDC</span>
+          </span>
+        </div>
+
+        <div style="margin-top:24px;padding:24px 28px;border-radius:14px;background:var(--secondary)">
+          <p class="tiny">Send exactly</p>
+          <div style="display:flex;margin-top:12px;align-items:baseline;gap:16px">
+            <b class="mono" style="font-size:52px">3.00</b>
+            <span class="mono" style="font-size:22px;color:var(--silver)">USDC</span>
+            <span class="spacer"></span>
+            <span class="tiny" style="letter-spacing:.08em;font-size:11px">Stablecoin · amount fixed in dollars</span>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;padding:20px 28px;border-radius:14px;background:var(--secondary)">
+          <div class="pr"><p class="tiny" style="flex:1">Send to this address</p>
+            <span class="tiny" style="color:var(--good);letter-spacing:.14em;animation:fade 380ms ease 35400ms both, fadeOut 380ms ease 36600ms forwards">Copied</span></div>
+          <div style="display:flex;margin-top:12px;gap:16px;align-items:center">
+            <b class="mono" style="font-size:17px;letter-spacing:.02em">0xb94a707D215Eb8d480E7acC15c831ACC57BA1e25</b>
+            <span class="spacer"></span>
+            <span class="btn ghost" id="copyBtn" style="padding:10px 17px;font-size:13px">
+              Copy
+              <span style="position:absolute;inset:0;border-radius:10px;background:#fff;opacity:0;
+                animation:press 560ms var(--ease) 35200ms both"></span>
+            </span>
+          </div>
+        </div>
+
+        <div style="margin-top:22px">
+          <p class="tiny">After transfer, paste transaction hash</p>
+          <div style="display:flex;margin-top:12px;gap:16px;align-items:center">
+            <div style="flex:1;border-radius:12px;box-shadow:0 0 0 1px var(--border-2);padding:18px 18px">
+              <span class="mono" style="font-size:15px;display:inline-flex;align-items:baseline">
+                <span class="typing" style="--w:162px;--steps:18;--dur:1200ms;--d:35932ms">0x7f3a9c41d8b64e02</span>
+              </span>
+            </div>
+            <span class="btn" style="padding:18px 30px;min-width:190px;position:relative">
+              <span style="position:absolute;inset:0;border-radius:10px;background:#fff;opacity:0;
+                animation:press 560ms var(--ease) 37380ms both"></span>
+              <span style="position:absolute;inset:0;display:grid;place-items:center;
+                animation:fadeOut 1ms step-end 37400ms both">Submit</span>
+              <span style="position:absolute;inset:0;display:grid;place-items:center;opacity:0;
+                animation:swap 1ms step-end 37400ms both, fadeOut 1ms step-end 37760ms forwards">Submitting…</span>
+              <span style="position:absolute;inset:0;display:grid;place-items:center;opacity:0;
+                animation:swap 1ms step-end 37760ms both">Submitted ✓</span>
+              <span style="opacity:0">Submit</span>
+            </span>
+          </div>
+        </div>
+
+        <div style="margin-top:26px;display:flex;align-items:center;gap:15px;padding:16px 20px;border-radius:13px;
+          background:rgba(127,174,138,.07);box-shadow:0 0 0 1px rgba(127,174,138,.22);
+          animation:rise 720ms var(--ease) 38030ms both">
+          <span style="width:36px;height:36px;border-radius:50%;background:rgba(127,174,138,.16);color:var(--good);
+            display:grid;place-items:center;font-size:18px;flex:none">✓</span>
+          <span style="display:flex;flex-direction:column;gap:6px">
+            <b style="font-size:16px">Hash submitted. Waiting for independent confirmation.</b>
+            <i style="font-family:var(--mono);font-style:normal;font-size:11.5px;letter-spacing:.18em;color:var(--muted-fg)">ORDER CLY-7K3M2QX9 · STATUS PENDING</i>
+          </span>
+        </div>
+      </div>
+
+      <div style="position:absolute;left:40px;right:40px;bottom:30px;padding-top:20px;border-top:1px solid var(--border);
+        display:flex;align-items:center;gap:14px">
+        <span class="tiny" style="font-size:11.5px;letter-spacing:.14em">Manual transfer only &nbsp;·&nbsp; no wallet connection &nbsp;·&nbsp; no custody</span>
+        <span class="spacer"></span>
+        <span class="tiny" style="font-size:11.5px;letter-spacing:.14em">Unpaid orders expire after 30 minutes</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SCENE 5 · the receipt ─── 39.101 – 46.360 ══════════ -->
+  <section class="scene on" style="--si:38901ms;--so:46160ms">
+    <div style="position:absolute;left:158px;top:264px;width:540px">
+      <p class="kicker inL" style="--d:39140ms;--dur:520ms">Your receipt</p>
+      <h2 class="display inL" style="--d:39220ms;--dur:680ms;font-size:62px;margin-top:16px">Issued straight away.</h2>
+      <p class="inL" style="--d:39300ms;--dur:680ms;margin-top:20px;font-size:16.5px;line-height:1.7;color:var(--muted-fg)">
+        Submitting the hash issues a receipt immediately, carrying the order code, the delivery handle, the items, the amount, the address and the hash.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:13px;margin-top:34px">
+        <span style="display:flex;gap:16px;align-items:center;padding:16px 20px;border-radius:12px;background:var(--card);animation:fade 520ms var(--ease) 41000ms both">
+          <b class="mono" style="font-size:12px;letter-spacing:.2em;color:var(--accent);width:96px">BARCODE</b>
+          <span style="font-size:14.5px;color:var(--muted-fg)">the order code, printed</span></span>
+        <span style="display:flex;gap:16px;align-items:center;padding:16px 20px;border-radius:12px;background:var(--card);animation:fade 520ms var(--ease) 41900ms both">
+          <b class="mono" style="font-size:12px;letter-spacing:.2em;color:var(--accent);width:96px">QR</b>
+          <span style="font-size:14.5px;color:var(--muted-fg)">opens the order's status page</span></span>
+        <span style="display:flex;gap:16px;align-items:center;padding:16px 20px;border-radius:12px;background:var(--card);animation:fade 520ms var(--ease) 42800ms both">
+          <b class="mono" style="font-size:12px;letter-spacing:.2em;color:var(--accent);width:96px">REISSUES</b>
+          <span style="font-size:14.5px;color:var(--muted-fg)">refreshed as the status changes</span></span>
+      </div>
+    </div>
+
+    <div style="position:absolute;right:196px;top:150px;animation:pop 920ms var(--ease) 39523ms both">
+      <div style="position:absolute;inset:-100px;border-radius:44px;background:radial-gradient(closest-side,rgba(246,243,236,.14),transparent 72%)"></div>
+      <div class="paper" style="position:relative;width:672px;padding:34px 38px 28px">
+        <div style="display:flex;align-items:flex-start">
+          <span style="display:flex;flex-direction:column;gap:8px">
+            <b style="font-size:20px;font-weight:600;letter-spacing:.28em;color:var(--ink)">CURIALY</b>
+            <i class="pk" style="font-style:normal">Receipt</i>
+          </span>
+          <span class="spacer"></span>
+          <span style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+            <i class="pk" style="font-style:normal">Order</i>
+            <b class="mono" style="font-size:19px;letter-spacing:.12em;color:var(--ink)">CLY-7K3M2QX9</b>
+          </span>
+        </div>
+
+        <div style="height:1px;background:rgba(22,22,26,.14);margin:24px 0"></div>
+
+        <div style="display:flex">
+          <span style="display:flex;flex-direction:column;gap:8px">
+            <i class="pk" style="font-style:normal">Status</i><b class="pv" style="color:#8a6a2a">Pending review</b></span>
+          <span class="spacer"></span>
+          <span style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+            <i class="pk" style="font-style:normal">Delivery handle</i><b class="pv">@yourhandle</b></span>
+        </div>
+
+        <div style="height:1px;background:rgba(22,22,26,.14);margin:24px 0"></div>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="pr"><span style="flex:1;font-size:15px">X Premium · 3 months</span><b class="pv">$3.00</b></div>
+          <div class="pr"><span class="pk" style="flex:1">Quantity</span><b class="pv">× 1</b></div>
+          <div class="pr"><span class="pk" style="flex:1">Network · coin</span><b class="pv">Polygon · USDC</b></div>
+          <div class="pr"><span class="pk" style="flex:1">Destination</span><b class="pv" style="font-size:11.5px">0xb94a…1e25</b></div>
+        </div>
+
+        <div style="height:1px;background:rgba(22,22,26,.14);margin:24px 0"></div>
+
+        <div style="display:flex;align-items:baseline">
+          <b style="font-size:14px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#7a7a72">Total</b>
+          <span class="spacer"></span>
+          <b class="display" style="font-size:38px;color:var(--ink)">$3.00</b>
+        </div>
+
+        <div style="margin-top:26px;border-radius:12px;background:var(--paper2);padding:22px 24px">
+          <div style="display:flex;align-items:center;gap:26px">
+            <span style="display:flex;flex-direction:column;gap:14px;flex:1;min-width:0">
+              <i class="pk" style="font-style:normal">Order barcode</i>
+              <span style="display:block;overflow:hidden;height:58px">
+                <img src="__ASSET:barcode.svg__" style="width:100%;height:58px;animation:wipeR 900ms var(--ease) 41911ms both">
+              </span>
+              <b class="mono" style="font-size:13px;letter-spacing:.22em;color:var(--ink)">CLY-7K3M2QX9</b>
+              <span class="mono" style="font-size:9.5px;letter-spacing:.18em;color:#7a7a72">
+                SCAN THE CODE AT THE RIGHT TO OPEN THIS ORDER'S STATUS PAGE.</span>
+            </span>
+            <span style="flex:none;display:flex;flex-direction:column;align-items:center;gap:10px">
+              <span style="width:138px;height:138px;position:relative">
+                <span style="position:absolute;inset:0;background:#fff;border-radius:10px;padding:9px;
+                  box-shadow:0 0 0 1px rgba(22,22,26,.14)">
+                  <img src="__ASSET:qr.svg__" style="width:100%;height:100%">
+                </span>
+                <span style="position:absolute;inset:0;background:var(--paper2);border-radius:10px;
+                  animation:qrSweep 900ms var(--ease) 44464ms both"></span>
+              </span>
+              <b class="mono" style="font-size:9.5px;letter-spacing:.22em;color:#16161a">SCAN TO CHECK</b>
+            </span>
+          </div>
+        </div>
+
+        <p class="pk" style="margin-top:22px;text-align:center;letter-spacing:.16em">
+          Independent store · not affiliated with third-party providers
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SCENE 6 · a person, and a promise ─── 46.360 – 53.880 ══ -->
+  <section class="scene on" style="--si:46160ms;--so:53680ms">
+    <div style="position:absolute;left:158px;right:158px;top:150px">
+      <p class="kicker inL" style="--d:46480ms;--dur:520ms">A person, not a queue</p>
+      <h2 class="display inL" style="--d:46560ms;--dur:700ms;font-size:58px;margin-top:14px">
+        Write to us, <span class="ital">we read it ourselves.</span>
+      </h2>
+    </div>
+
+    <div class="card" style="position:absolute;left:158px;top:346px;width:800px;height:566px;padding:34px 36px;
+      animation:inL 780ms var(--ease) 46760ms both">
+      <div class="pr" style="padding-bottom:20px;border-bottom:1px solid var(--border)">
+        <span style="display:flex;align-items:center;gap:15px">
+          <span style="width:46px;height:46px;border-radius:50%;background:var(--secondary);display:grid;place-items:center;font-size:20px">✦</span>
+          <span style="display:flex;flex-direction:column;gap:5px">
+            <b style="font-size:16.5px">The desk</b>
+            <i style="font-family:var(--mono);font-style:normal;font-size:12px;color:var(--silver)">@Curialy on Telegram</i>
+          </span>
+        </span>
+        <span class="spacer"></span>
+        <span style="display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted-fg)">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--good)"></span>online</span>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px;margin-top:28px">
+        <div style="align-self:flex-end;max-width:520px;border-radius:16px 16px 4px 16px;background:var(--secondary);padding:16px 20px;font-size:15.5px;line-height:1.55;
+          animation:pop 520ms var(--ease) 46814ms both">
+          Hi — order CLY-7K3M2QX9 hasn't arrived on my account yet.
+        </div>
+        <div style="align-self:flex-start;display:flex;gap:7px;padding:19px 20px;border-radius:16px 16px 16px 4px;background:var(--card);
+          box-shadow:0 0 0 1px var(--border);animation:pop 400ms var(--ease) 48300ms both, fadeOut 300ms ease 48980ms forwards">
+          <span class="td"></span><span class="td"></span><span class="td"></span>
+        </div>
+        <div style="align-self:flex-start;max-width:570px;border-radius:16px 16px 16px 4px;background:var(--card);box-shadow:0 0 0 1px var(--border);
+          padding:16px 20px;font-size:15.5px;line-height:1.55;animation:pop 580ms var(--ease) 49080ms both">
+          Checking the chain now. If it never reached the account you named, the refund is already due.
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:30px;animation:fade 620ms var(--ease) 49700ms both">
+        <span class="qchip">Order status</span>
+        <span class="qchip">Missing delivery</span>
+        <span class="qchip">Payment questions</span>
+        <span class="qchip">Refunds</span>
+      </div>
+
+      <p class="tiny" style="position:absolute;left:36px;bottom:30px;letter-spacing:.05em;text-transform:none;font-size:12px;
+        animation:fade 520ms var(--ease) 50100ms both">Typical reply within a day. A person on the Curialy side opens every message.</p>
+    </div>
+
+    <div class="card" style="position:absolute;right:158px;top:346px;width:640px;height:566px;padding:40px 42px;
+      animation:inR 780ms var(--ease) 47020ms both, refundGlow 900ms var(--ease) 50100ms forwards">
+      <p class="kicker">Refund policy</p>
+      <h3 class="display" style="font-size:46px;margin-top:16px;line-height:1.12">
+        If it never arrives,<br><span class="ital">the money comes back.</span>
+      </h3>
+      <p style="margin-top:22px;font-size:16px;line-height:1.75;color:var(--muted-fg)">
+        A paid order that fails to reach you is refunded. That is the whole point of the page — no theatre, no endless chain of tickets.
+      </p>
+
+      <div style="margin-top:30px;display:flex;flex-direction:column;gap:14px">
+        <div class="pr" style="gap:14px">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--silver);flex:none"></span>
+          <span style="font-size:14.5px;color:var(--muted-fg)">Payment received, fulfillment not completed</span>
+        </div>
+        <div class="pr" style="gap:14px">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--silver);flex:none"></span>
+          <span style="font-size:14.5px;color:var(--muted-fg)">Delivery attempted and unfinished</span>
+        </div>
+        <div class="pr" style="gap:14px">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--silver);flex:none"></span>
+          <span style="font-size:14.5px;color:var(--muted-fg)">Same amount, same network and coin</span>
+        </div>
+      </div>
+
+      <p class="tiny" style="margin-top:26px;letter-spacing:.05em;text-transform:none;font-size:12px;line-height:1.7">
+        A change of mind after the plan is working on your account is not a refund.
+      </p>
+
+      <div style="position:absolute;left:42px;right:42px;bottom:40px">
+        <div style="display:flex;gap:16px;align-items:center;padding:20px 22px;border-radius:14px;background:var(--secondary)">
+          <span style="width:46px;height:46px;flex:none;border-radius:12px;background:rgba(127,174,138,.15);color:var(--good);
+            display:grid;place-items:center;font-size:22px;animation:pop 620ms var(--ease) 50600ms both">✓</span>
+          <span style="display:flex;flex-direction:column;gap:6px">
+            <b style="font-size:15.5px">If a paid order fails to reach you, we refund it.</b>
+            <i style="font-family:var(--mono);font-style:normal;font-size:11.5px;letter-spacing:.14em;color:var(--silver)">WRITTEN IN PLAIN LANGUAGE</i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SCENE 7 · end card ─── 53.880 – 60.000 ═════════════ -->
+  <section class="scene on" style="--si:53680ms;--so:59999ms">
+    <div style="position:absolute;inset:0;display:grid;place-items:center;text-align:center">
+      <div>
+        <svg viewBox="0 0 512 512" style="width:148px;height:148px;margin:0 auto;display:block;
+          animation:blurIn 900ms var(--ease) 54200ms both">
+          <circle cx="256" cy="256" r="228" fill="none" stroke="#6a6e76" stroke-width="18"
+            stroke-dasharray="670 48" stroke-dashoffset="359"/>
+          <path fill="#f5f5f6" d="M339.2 181.0 A112 112 0 1 0 339.2 331.0 L303.55 298.82 A64 64 0 1 1 303.55 213.18 Z"/>
+        </svg>
+        <h1 class="display" style="font-size:104px;margin-top:38px;line-height:1.06">
+          <span class="rise" style="--d:54653ms;--dur:780ms;display:inline-block">Subscriptions,</span>
+          <span class="typing" style="--d:55748ms;--dur:840ms;--w:100%;--steps:14;display:block;margin-top:10px">
+            <em class="ital">made simple.</em>
+          </span>
+        </h1>
+        <div class="display" style="font-size:64px;margin-top:44px;position:relative;display:inline-block;
+          animation:blurIn 780ms var(--ease) 56950ms both">
+          curialy.com
+          <span style="position:absolute;left:0;bottom:-16px;height:3px;width:100%;background:var(--accent);border-radius:2px;
+            transform-origin:left center;animation:grow 720ms var(--ease) 57500ms both"></span>
+        </div>
+        <p class="tiny" style="margin-top:80px;animation:fade 720ms var(--ease) 57800ms both">
+          Independent digital store &nbsp;·&nbsp; USDC / USDT &nbsp;·&nbsp; six networks &nbsp;·&nbsp; @Curialy
+        </p>
+        <p class="tiny" style="margin-top:24px;color:#5f636b;animation:fade 720ms var(--ease) 58250ms both">
+          Names may be used only to identify compatible plan categories.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div style="position:absolute;inset:0;background:#09090b;z-index:60;animation:fade 700ms linear 59280ms both"></div>
+</div>
+
+<style>
+/* keyframes that need to reference runtime CSS values */
+@keyframes drawRing{from{stroke-dashoffset:1432}to{stroke-dashoffset:1432}}
+@keyframes cardXhover{from{transform:scale(1)}to{transform:scale(1.014)}}
+@keyframes cardAIhover{from{transform:scale(1)}to{transform:scale(1.014)}}
+@keyframes press{0%{opacity:0}18%{opacity:.38}100%{opacity:0}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes refundGlow{from{box-shadow:0 0 0 1px var(--border),0 34px 80px -56px #000}
+                      to{box-shadow:0 0 0 1px rgba(244,244,245,.24),0 34px 80px -56px #000}}
+.td{width:7px;height:7px;border-radius:50%;background:var(--muted-fg);display:inline-block;animation:td 1200ms ease-in-out infinite}
+.td:nth-child(2){animation-delay:160ms}.td:nth-child(3){animation-delay:320ms}
+@keyframes td{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+</style>
+
+<script>
+/* a real ring draw-on: the dash offset is data, so set it up once */
+(function () {
+  const ring = document.querySelector('#stage svg circle[stroke-dashoffset="1432"]');
+  if (!ring) return;
+  const len = 2 * Math.PI * 228;            // 1432.6
+  ring.style.strokeDasharray = len;
+  const style = document.createElement('style');
+  style.textContent = '@keyframes drawRingReal{from{stroke-dashoffset:' + len + '}to{stroke-dashoffset:670}}';
+  document.head.appendChild(style);
+  ring.style.animation = 'drawRingReal 1150ms cubic-bezier(.22,1,.36,1) 140ms both';
+})();
+
+/* the grain tile, generated once and frozen into the frame */
+(function () {
+  const c = document.getElementById('grain');
+  const ctx = c.getContext('2d');
+  const img = ctx.createImageData(c.width, c.height);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const v = 128 + (Math.random() * 64 - 32);
+    d[i] = d[i + 1] = d[i + 2] = v;
+    d[i + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+})();
+
+/* ── the whole renderer needs is this ─────────────────────────
+   Pause every animation on the page and place it at t. Because
+   every delay is absolute, one number addresses the entire film. */
+window.seek = function (t) {
+  const list = document.getAnimations();
+  for (let i = 0; i < list.length; i++) {
+    list[i].pause();
+    list[i].currentTime = t;
+  }
+  return list.length;
+};
+window.playAll = function () {
+  const list = document.getAnimations();
+  for (let i = 0; i < list.length; i++) list[i].play();
+};
+window.DURATION = 60000;
+</script>
+</body>
+</html>

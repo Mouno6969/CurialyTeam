@@ -1,0 +1,13 @@
+# rendered intermediates — regenerate with tools/render.mjs
+frames/
+_review/
+bench/
+
+# installed toolchain (ffmpeg, ffprobe, chromium, qrcode, bwip-js)
+tools/node_modules/
+tools/package-lock.json
+tools/package.json
+_qa/
+
+# the silent master is a working file; the voiced cut ships
+# (the silent master is a working file and is not kept in the repo)
